@@ -116,7 +116,7 @@ public class ChessBoardGUI {
                     new JLabel(COLS.substring(ii, ii + 1),
                             SwingConstants.CENTER));
         }
-        // fill the black non-pawn piece row
+        // fill the rest of the chessBoard
         for (int ii = 0; ii < 8; ii++) {
             for (int jj = 0; jj < 8; jj++) {
                 switch (jj) {
@@ -124,7 +124,7 @@ public class ChessBoardGUI {
                         chessBoard.add(new JLabel("" + (ii + 1),
                                 SwingConstants.CENTER));
                     default:
-                        chessBoard.add(chessBoardSquares[jj][ii]);
+                        chessBoard.add(chessBoardSquares[ii][jj]);
                 }
             }
         }
@@ -137,12 +137,31 @@ public class ChessBoardGUI {
     public void setupBoard() {
         String userInput = JOptionPane.showInputDialog(
                 null, "Input a valid FEN", "Input", JOptionPane.QUESTION_MESSAGE);
-        board = new Board(userInput);
-        HashMap<String, Piece> pieces = board.getBoardstate();
-        for (String key : pieces.keySet()) {
-            int column = Integer.parseInt(key.substring(0,1));
-            int row = Integer.parseInt(key.substring(1,2));
-            chessBoardSquares[column][row].reinitialize(pieces.get(key));
+        if (userInput == null) {
+            return;
+        }
+        // Initialize the board with the given FEN
+        String[] fields = userInput.split(" ");
+        board = new Board(fields);
+        String[] ranks = fields[0].split("/");
+        // First Field: pieces and their positions
+        for (int row = 0; row < 8; row++) {
+            int column = 0;
+            for (int j = 0; j < ranks[row].length(); j++ ) { //j = current index along rank entry
+                try {
+                    int empties = Integer.parseInt(ranks[row].substring(j,j+1));
+                    for (int k = 0; k < empties; k++) {
+                        Piece piece = new Piece("Empty", false);
+                        // Why is this column then rank?
+                        chessBoardSquares[row][column].reinitialize(piece);
+                        column++;
+                    }
+                } catch (NumberFormatException e) {
+                    Piece piece = new Piece(ranks[row].substring(j,j+1), false);
+                    chessBoardSquares[row][column].reinitialize(piece);
+                    column++;
+                }
+            }
         }
     }
 

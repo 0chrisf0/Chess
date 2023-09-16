@@ -29,7 +29,6 @@ public class Piece extends JButton {
      */
     private Boolean moved;
 
-
     public Piece(String type, Boolean moved) {
         super();
         HashMap<String, String> filenames = new HashMap<>();
