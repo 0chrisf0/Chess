@@ -1,11 +1,15 @@
 import java.util.HashMap;
 import java.util.HashSet;
 
+/**
+ * The Board class contains all the chess game logic. This is where legal moves are calculated given
+ * the current state of the chessboard.
+ */
 public class Board {
     /**
      * Current boardstate, contains all pieces present.
      */
-    private HashMap<String, Piece> boardstate = new HashMap<>();
+    private Piece[][] boardstate = new Piece[8][8];
 
     /**
      * Whose turn it is. "w" or "b"
@@ -35,8 +39,15 @@ public class Board {
     /**
      * Return boardstate.
      */
-    public HashMap<String, Piece> getBoardstate() {
+    public Piece[][] getBoardstate() {
         return boardstate;
+    }
+
+    /**
+     * Update the boardstate to be in sync with the chessBoardSquares
+     */
+    public void updateBoardState(Piece[][] chessBoardSquares) {
+        boardstate = chessBoardSquares;
 
     }
     /**
@@ -47,29 +58,7 @@ public class Board {
      *
      * Lowercase letters denote black pieces.
      */
-    public Board(String startingPosition) {
-        System.out.println(startingPosition);
-        String[] fields = startingPosition.split(" ");
-        String[] ranks = fields[0].split("/");
-        // First Field: pieces and their positions
-        for (int rank = 0; rank < 8; rank++) {
-            int currentPos = 0;
-            for (int j = 0; j < ranks[rank].length(); j++ ) { //j = current index along rank entry
-                try {
-                    int empties = Integer.parseInt(ranks[rank].substring(j,j+1));
-                    for (int k = 0; k < empties; k++) {
-                        Piece piece = new Piece("Empty", false);
-                        boardstate.put((currentPos) + Integer.toString(rank),piece);
-                        currentPos++;
-                    }
-                } catch (NumberFormatException e) {
-                    Piece piece = new Piece(ranks[rank].substring(j,j+1), false);
-                    boardstate.put((currentPos) + Integer.toString(rank),piece);
-                    currentPos++;
-
-                }
-            }
-        }
+    public Board(String[] fields) {
         // Second field: turn
         turn = fields[1];
         // Third field: castling
@@ -89,4 +78,5 @@ public class Board {
         // Sixth field: fullmoves
         fullmoves = Integer.parseInt(fields[5]);
     }
+
 }
