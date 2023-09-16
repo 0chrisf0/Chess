@@ -101,7 +101,7 @@ public class ChessBoardGUI {
                 } else {
                     b.setBackground(new Color(brownColor[0], brownColor[1], brownColor[2]));
                 }
-                chessBoardSquares[jj][ii] = b;
+                chessBoardSquares[ii][jj] = b;
                 final int row = jj;
                 final int column = ii;
                 //b.addActionListener(e -> activeButton(row + Integer.toString(column)));
@@ -121,7 +121,7 @@ public class ChessBoardGUI {
             for (int jj = 0; jj < 8; jj++) {
                 switch (jj) {
                     case 0:
-                        chessBoard.add(new JLabel("" + (ii + 1),
+                        chessBoard.add(new JLabel("" + (8- ii),
                                 SwingConstants.CENTER));
                     default:
                         chessBoard.add(chessBoardSquares[ii][jj]);
