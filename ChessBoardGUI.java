@@ -14,7 +14,7 @@ public class ChessBoardGUI {
     /**
      * chessBoardSquares is a 2D array representing all the squares of the chessboard.
      */
-    private JButton[][] chessBoardSquares = new JButton[8][8];
+    private Piece[][] chessBoardSquares = new Piece[8][8];
     /**
      * brownColor is the RGB value corresponding to the color of the brown chessboard squares.
      */
@@ -86,7 +86,7 @@ public class ChessBoardGUI {
         Insets buttonMargin = new Insets(0,0,0,0);
         for (int ii = 0; ii < chessBoardSquares.length; ii++) {
             for (int jj = 0; jj < chessBoardSquares[ii].length; jj++) {
-                JButton b = new JButton();
+                Piece b = new Piece("Empty",false);
                 b.setMargin(buttonMargin);
 
                 // our chess pieces are 60x60 px in size, so we'll
@@ -140,13 +140,9 @@ public class ChessBoardGUI {
         board = new Board(userInput);
         HashMap<String, Piece> pieces = board.getBoardstate();
         for (String key : pieces.keySet()) {
-            String position = key;
-            // 1-based
-            int column = Integer.parseInt(position.substring(0,1));
-            int row = Integer.parseInt(position.substring(1,2));
-            ImageIcon icon = new ImageIcon("icons/" + pieces.get(key).getIcon());
-
-            chessBoardSquares[column][row].setIcon(icon);
+            int column = Integer.parseInt(key.substring(0,1));
+            int row = Integer.parseInt(key.substring(1,2));
+            chessBoardSquares[column][row].reinitialize(pieces.get(key));
         }
     }
 

@@ -1,6 +1,10 @@
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 
-public class Piece {
+public class Piece extends JButton {
     /**
      * Color = 1 means black
      * Color = 0 means white
@@ -18,21 +22,16 @@ public class Piece {
     /**
      * Correct icon file name.
      */
-    private String icon;
+    private String iconFile;
 
     /**
      * Whether this piece has moved
      */
     private Boolean moved;
 
-    /**
-     * Return the icon file name.
-     */
-    public String getIcon() {
-        return icon;
-    }
 
     public Piece(String type, Boolean moved) {
+        super();
         HashMap<String, String> filenames = new HashMap<>();
         filenames.put("k", "king");
         filenames.put("b", "bishop");
@@ -46,10 +45,18 @@ public class Piece {
             this.color = -1;
         } else if (type.equals(type.toUpperCase())) { // White Piece
             this.color = 0;
-            icon = "white" + filenames.get(type.toLowerCase()) + ".png";
+            iconFile = "icons/white" + filenames.get(type.toLowerCase()) + ".png";
         } else {
             this.color = 1; // Black Piece
-            icon = "black" + filenames.get(type) + ".png";
+            iconFile = "icons/black" + filenames.get(type) + ".png";
         }
+        //TODO add action listener in the constructor
+    }
+    public void reinitialize(Piece piece) {
+        color = piece.color;
+        type = piece.type;
+        iconFile = piece.iconFile;
+        moved = piece.moved;
+        setIcon(new ImageIcon(piece.iconFile));
     }
 }
