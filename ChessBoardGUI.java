@@ -38,6 +38,19 @@ public class ChessBoardGUI {
     private static final String COLS = "ABCDEFGH";
 
     /**
+     * The current gamestate, a value from enum gamestate.
+     */
+    gamestate currentGamestate = gamestate.INACTIVE;
+    enum gamestate {
+        INACTIVE,
+        WHITE,
+        WHITE_SELECT,
+        BLACK,
+        BLACK_SELECT
+    }
+
+
+    /**
      * Returns the current GUI.
      */
     public final JComponent getGui() {
@@ -47,6 +60,12 @@ public class ChessBoardGUI {
      * Represents the Board corresponding to the current GUI.
      */
     private Board board;
+
+    /**
+     * Represents the position of the last click on the chessBoard. Index 0 is the row and index 1
+     * is the column.
+     */
+    int[] lastclick = new int[2];
 
     /**
      * Constructor for ChessBoardGUI. Makes use of initializeGui().
@@ -62,11 +81,14 @@ public class ChessBoardGUI {
         tools.setFloatable(false);
         gui.add(tools, BorderLayout.PAGE_START);
 
-        tools.add(new JButton("Start")); // TODO - add functionality
+        JButton start = new JButton("Start");
+        tools.add(start);
+        start.addActionListener(e -> startGame());
+
 
 
         JButton newgame = new JButton("New");
-        tools.add(newgame); // TODO - add functionality
+        tools.add(newgame);
         newgame.addActionListener(e -> setupBoard());
 
         tools.add(new JButton("Save")); // TODO - add functionality!
@@ -102,9 +124,9 @@ public class ChessBoardGUI {
                     b.setBackground(new Color(brownColor[0], brownColor[1], brownColor[2]));
                 }
                 chessBoardSquares[ii][jj] = b;
-                final int row = jj;
-                final int column = ii;
-                //b.addActionListener(e -> activeButton(row + Integer.toString(column)));
+                final int row = ii;
+                final int column = jj;
+                b.addActionListener(e -> buttonPress(row, column));
             }
         }
 
@@ -165,4 +187,56 @@ public class ChessBoardGUI {
         }
     }
 
+    public void startGame() {
+        if (board == null) {
+            return;
+        }
+        if (board.getTurn().equals("w")) {
+            currentGamestate = gamestate.WHITE;
+        } else {
+            currentGamestate = gamestate.BLACK;
+        }
+
+    }
+
+    public void buttonPress(int row, int column) {
+        switch (currentGamestate) {
+            case WHITE:
+                if (chessBoardSquares[row][column].getColor() == 0) {
+                    currentGamestate = gamestate.WHITE_SELECT;
+                    chessBoardSquares[row][column].setBackground(Color.green);
+                }
+                break;
+            case WHITE_SELECT:
+                // Allow user to deselect the piece they chose
+                if (row == lastclick[0] && column == lastclick[1]) {
+                    currentGamestate = gamestate.WHITE;
+                    chessBoardSquares[row][column].originalBackground();
+                    break;
+                }
+                // These are the things that need to happen in this case statement (and BLACK_SELECT):
+                // 1. Check if the move is legal
+                // 2. IF the move is legal, make the move and update data accordingly, otherwise
+                //    set gamestate back to WHITE or BLACK.
+                // 3. Check for checks on the opposing King
+                // 4. If there is a check, should automatically check for checkmate as well.
+                if (board.checkMove(lastclick[0], lastclick[1], row, column, chessBoardSquares)) {
+                    // Make Move
+                } else {
+                    currentGamestate = gamestate.WHITE;
+                }
+                break;
+            case BLACK:
+                if (chessBoardSquares[row][column].getColor() == 1) {
+                    currentGamestate = gamestate.BLACK_SELECT;
+                }
+                break;
+            case BLACK_SELECT:
+                break;
+            default:
+                return;
+        }
+        lastclick[0] = row;
+        lastclick[1] = column;
+    }
 }

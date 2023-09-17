@@ -6,10 +6,6 @@ import java.util.HashSet;
  * the current state of the chessboard.
  */
 public class Board {
-    /**
-     * Current boardstate, contains all pieces present.
-     */
-    private Piece[][] boardstate = new Piece[8][8];
 
     /**
      * Whose turn it is. "w" or "b"
@@ -37,18 +33,10 @@ public class Board {
     private int fullmoves;
 
     /**
-     * Return boardstate.
+     * Returns whose turn it is
      */
-    public Piece[][] getBoardstate() {
-        return boardstate;
-    }
-
-    /**
-     * Update the boardstate to be in sync with the chessBoardSquares
-     */
-    public void updateBoardState(Piece[][] chessBoardSquares) {
-        boardstate = chessBoardSquares;
-
+    public String getTurn() {
+        return turn;
     }
     /**
      * Construct a board object given a starting position.
@@ -79,4 +67,9 @@ public class Board {
         fullmoves = Integer.parseInt(fields[5]);
     }
 
+    public boolean checkMove(int originRow, int originColumn,
+            int destinationRow, int destinationColumn, Piece[][] boardstate) {
+
+        return true;
+    }
 }

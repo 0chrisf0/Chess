@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import javax.swing.Icon;
@@ -29,6 +30,22 @@ public class Piece extends JButton {
      */
     private Boolean moved;
 
+    /**
+     * The original background color of this square.
+     */
+    private Color background;
+
+    /**
+     * Sets the background color to the original one
+     * @return
+     */
+    public void originalBackground() {
+        setBackground(background);
+    }
+
+    public int getColor() {
+        return color;
+    }
     public Piece(String type, Boolean moved) {
         super();
         HashMap<String, String> filenames = new HashMap<>();
@@ -49,13 +66,13 @@ public class Piece extends JButton {
             this.color = 1; // Black Piece
             iconFile = "icons/black" + filenames.get(type) + ".png";
         }
-        //TODO add action listener in the constructor
     }
     public void reinitialize(Piece piece) {
         color = piece.color;
         type = piece.type;
         iconFile = piece.iconFile;
         moved = piece.moved;
+        background = getBackground();
         setIcon(new ImageIcon(piece.iconFile));
     }
 }
