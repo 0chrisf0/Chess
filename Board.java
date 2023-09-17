@@ -69,7 +69,67 @@ public class Board {
 
     public boolean checkMove(int originRow, int originColumn,
             int destinationRow, int destinationColumn, Piece[][] boardstate) {
+        HashSet<String> legalMoves = new HashSet<>();
+        String piece = boardstate[originRow][originColumn].getType();
+        if (piece.equals("P")) {
+            legalMoves = pawnLogic(true);
+        } else if (piece.equals("p")) {
+            legalMoves = pawnLogic(false);
+        }
+        if (piece.equals("R")) {
+            legalMoves = rookLogic(true);
+        } else if (piece.equals("r")) {
+            legalMoves = rookLogic(false);
+        }
+        if (piece.equals("Q")) {
+            legalMoves = queenLogic(true);
+        } else if (piece.equals("q")) {
+            legalMoves = queenLogic(false);
+        }
+        if (piece.equals("K")) {
+            legalMoves = kingLogic(true);
+        } else if (piece.equals("k")) {
+            legalMoves = kingLogic(false);
+        }
+        if (piece.equals("B")) {
+            legalMoves = bishopLogic(true);
+        } else if (piece.equals("b")) {
+            legalMoves = bishopLogic(false);
+        }
+        if (piece.equals("N")) {
+            legalMoves = knightLogic(true);
+        } else if (piece.equals("n")) {
+            legalMoves = knightLogic(false);
+        }
 
-        return true;
+        if (legalMoves.contains(positionOfCoord(destinationRow, destinationColumn))) {
+            return true;
+        }
+
+        return true; // uncomment
+        // return false;
+    }
+
+    public HashSet<String> pawnLogic(boolean white) {
+
+    }
+    public HashSet<String> rookLogic(boolean white) {
+
+    }
+    public HashSet<String> bishopLogic(boolean white) {
+
+    }
+    public HashSet<String> knightLogic(boolean white) {
+
+    }
+    public HashSet<String> queenLogic(boolean white) {
+
+    }
+    public HashSet<String> kingLogic(boolean white) {
+
+    }
+
+    public String positionOfCoord(int row, int column) {
+        return row + Integer.toString(column);
     }
 }

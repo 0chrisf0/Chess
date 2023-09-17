@@ -46,6 +46,13 @@ public class Piece extends JButton {
     public int getColor() {
         return color;
     }
+
+    /**
+     * Returns the type of this piece.
+     */
+    public String getType() {
+        return type;
+    }
     public Piece(String type, Boolean moved) {
         super();
         HashMap<String, String> filenames = new HashMap<>();
