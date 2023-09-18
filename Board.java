@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -31,6 +32,17 @@ public class Board {
      * Fullmove clock... number of moves made by black
      */
     private int fullmoves;
+
+    /**
+     * Enum representing directions on the chessboard. Used to generate moves depending on piece
+     * color.
+     */
+    enum dir{
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
+    }
 
     /**
      * Returns whose turn it is
@@ -77,9 +89,10 @@ public class Board {
             legalMoves = pawnLogic(false);
         }
         if (piece.equals("R")) {
-            legalMoves = rookLogic(true);
+            legalMoves = rookLogic(originRow, originColumn, boardstate);
+
         } else if (piece.equals("r")) {
-            legalMoves = rookLogic(false);
+            legalMoves = rookLogic(originRow, originColumn, boardstate);
         }
         if (piece.equals("Q")) {
             legalMoves = queenLogic(true);
@@ -106,30 +119,102 @@ public class Board {
             return true;
         }
 
-        return true; // uncomment
+        return true;
+        // uncomment
         // return false;
     }
 
-    public HashSet<String> pawnLogic(boolean white) {
+    private HashSet<String> pawnLogic(boolean white) {
 
-    }
-    public HashSet<String> rookLogic(boolean white) {
-
-    }
-    public HashSet<String> bishopLogic(boolean white) {
-
-    }
-    public HashSet<String> knightLogic(boolean white) {
-
-    }
-    public HashSet<String> queenLogic(boolean white) {
-
-    }
-    public HashSet<String> kingLogic(boolean white) {
-
+        return new HashSet<>();
     }
 
-    public String positionOfCoord(int row, int column) {
+    /**
+     * Returns the legalMoves for a rook given the current boardstate.
+     */
+    private HashSet<String> rookLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        HashSet<String> legalMoves = new HashSet<>();
+        int up = scan(dir.UP, originRow, originColumn, boardstate);
+        int down = scan(dir.DOWN, originRow, originColumn, boardstate);
+        int right = scan(dir.RIGHT, originRow, originColumn, boardstate);
+        int left = scan(dir.LEFT, originRow, originColumn, boardstate);
+        // Forwards and backwards moves
+        for (int i = originRow; i < up; i++) {
+            legalMoves.add(positionOfCoord(i, originColumn));
+        }
+        for (int i = originRow; i > down; i--) {
+            legalMoves.add(positionOfCoord(i, originColumn));
+        }
+        // Right and left moves
+        for (int i = originRow; i < right; i++) {
+            legalMoves.add(positionOfCoord(originRow, i));
+        }
+        for (int i = originRow; i > left; i--) {
+            legalMoves.add(positionOfCoord(originRow, i));
+        }
+        return legalMoves;
+    }
+    private HashSet<String> bishopLogic(boolean white) {
+        return new HashSet<>();
+    }
+    private HashSet<String> knightLogic(boolean white) {
+        return new HashSet<>();
+    }
+    private HashSet<String> queenLogic(boolean white) {
+        return new HashSet<>();
+    }
+    private HashSet<String> kingLogic(boolean white) {
+        return new HashSet<>();
+    }
+
+    /**
+     * Returns the column or row number of the first square that the piece CANNOT move to. A piece
+     * can not move past a piece that is blocking its path.
+     */
+    private int scan(dir direction, int row, int column, Piece[][] boardstate) {
+        int current = 0;
+        // TODO prevent index out of bounds errors and treat pieces of different colors differently
+        // TODO i.e. capturing is allowed only of opposite color piece
+        switch (direction) {
+            case UP:
+                current = row;
+                while (boardstate[current][column].getType().equals("Empty")) {
+                    current++;
+                }
+                current++;
+                break;
+            case DOWN:
+                current = row;
+                while (boardstate[current][column].getType().equals("Empty")) {
+                    current--;
+                }
+                current--;
+                break;
+            case RIGHT:
+                current = column;
+                while (boardstate[row][current].getType().equals("Empty")) {
+                    current++;
+                }
+                current++;
+                break;
+            case LEFT:
+                current = column;
+                while (boardstate[row][current].getType().equals("Empty")) {
+                    current--;
+                }
+                current--;
+                break;
+        }
+        System.out.println(current);
+        return current;
+    }
+
+    private String positionOfCoord(int row, int column) {
         return row + Integer.toString(column);
+    }
+
+    private int[] coordOfPosition(String position) {
+        return new int[]{Integer.parseInt(position.substring(0,1)),
+                Integer.parseInt(position.substring(1,2))};
     }
 }
