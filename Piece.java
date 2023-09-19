@@ -8,8 +8,8 @@ import javax.swing.JButton;
 public class Piece extends JButton {
     /**
      * Color = 1 means black
-     * Color = 0 means white
-     * Color = -1 means empty
+     * Color = -1 means white
+     * Color = 0 means empty
      */
     private int color;
 
@@ -65,9 +65,9 @@ public class Piece extends JButton {
         this.moved = moved;
         this.type = type;
         if (type.equals("Empty")) {
-            this.color = -1;
-        } else if (type.equals(type.toUpperCase())) { // White Piece
             this.color = 0;
+        } else if (type.equals(type.toUpperCase())) { // White Piece
+            this.color = -1;
             iconFile = "icons/white" + filenames.get(type.toLowerCase()) + ".png";
         } else {
             this.color = 1; // Black Piece

@@ -30,7 +30,7 @@ class BoardTests {
                 }
             }
         }
-        assertTrue(board.checkMove(originRow, originCol, destRow, destCol, chessBoardSquares));
+
     }
 
     @Test

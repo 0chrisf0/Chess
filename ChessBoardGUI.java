@@ -65,7 +65,9 @@ public class ChessBoardGUI {
      * Represents the position of the last click on the chessBoard. Index 0 is the row and index 1
      * is the column.
      */
-    int[] lastclick = new int[2];
+    private int[] lastclick = new int[2];
+
+
 
     /**
      * Constructor for ChessBoardGUI. Makes use of initializeGui().
@@ -199,10 +201,13 @@ public class ChessBoardGUI {
 
     }
 
+    /**
+     * Handles the movement of the pieces on the GUI. Ensures that moves are legal.
+     */
     public void buttonPress(int row, int column) {
         switch (currentGamestate) {
             case WHITE:
-                if (chessBoardSquares[row][column].getColor() == 0) {
+                if (chessBoardSquares[row][column].getColor() == -1) {
                     currentGamestate = gamestate.WHITE_SELECT;
                     chessBoardSquares[row][column].setBackground(Color.green);
                 }
