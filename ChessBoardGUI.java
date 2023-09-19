@@ -216,12 +216,12 @@ public class ChessBoardGUI {
                 }
                 // These are the things that need to happen in this case statement (and BLACK_SELECT):
                 // 1. Check if the move is legal
-                // 2. IF the move is legal, make the move and update data accordingly, otherwise
-                //    set gamestate back to WHITE or BLACK.
+                // 2. IF the move is legal, make the move and update data accordingly (DETECT CHECKS)
+                // otherwise set gamestate back to WHITE or BLACK.
                 // 3. Check for checks on the opposing King
                 // 4. If there is a check, should automatically check for checkmate as well.
                 if (board.checkMove(lastclick[0], lastclick[1], row, column, chessBoardSquares)) {
-                    // Make Move
+
                 } else {
                     currentGamestate = gamestate.WHITE;
                 }
