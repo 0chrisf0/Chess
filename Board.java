@@ -90,7 +90,6 @@ public class Board {
         }
         if (piece.equals("R")) {
             legalMoves = rookLogic(originRow, originColumn, boardstate);
-
         } else if (piece.equals("r")) {
             legalMoves = rookLogic(originRow, originColumn, boardstate);
         }
@@ -173,36 +172,51 @@ public class Board {
      */
     private int scan(dir direction, int row, int column, Piece[][] boardstate) {
         int current = 0;
+        int color = boardstate[row][column].getColor();
         // TODO prevent index out of bounds errors and treat pieces of different colors differently
-        // TODO i.e. capturing is allowed only of opposite color piece
+        // TODO i.e. capturing is allowed only of opposite color piece... capture should be handled
+        // TODO somewher else
+        System.out.println(positionOfCoord(row,column));
         switch (direction) {
             case UP:
-                current = row;
-                while (boardstate[current][column].getType().equals("Empty")) {
-                    current++;
+                current = row+1;
+                while (current <= 7) {
+                    if (boardstate[current][column].getType().equals("Empty")) {
+                        current++;
+                    } else {
+                        break;
+                    }
                 }
-                current++;
                 break;
             case DOWN:
-                current = row;
-                while (boardstate[current][column].getType().equals("Empty")) {
-                    current--;
+                current = row-1;
+                while (current >= 0) {
+                    if (boardstate[current][column].getType().equals("Empty")) {
+                        current--;
+                    } else {
+                        break;
+                    }
                 }
-                current--;
                 break;
             case RIGHT:
-                current = column;
-                while (boardstate[row][current].getType().equals("Empty")) {
-                    current++;
+                current = column+1;
+                while (current <= 7) {
+                    if (boardstate[row][current].getType().equals("Empty")) {
+                        current++;
+                    } else {
+                        break;
+                    }
                 }
-                current++;
                 break;
             case LEFT:
-                current = column;
-                while (boardstate[row][current].getType().equals("Empty")) {
-                    current--;
+                current = column-1;
+                while (current >= 0) {
+                    if (boardstate[row][current].getType().equals("Empty")) {
+                        current--;
+                    } else {
+                        break;
+                    }
                 }
-                current--;
                 break;
         }
         System.out.println(current);
