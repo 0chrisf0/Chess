@@ -131,7 +131,6 @@ public class ChessBoardGUI {
                 b.addActionListener(e -> buttonPress(row, column));
             }
         }
-
         //fill the chess board
         chessBoard.add(new JLabel(""));
         // fill the top row

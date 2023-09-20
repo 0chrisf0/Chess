@@ -35,13 +35,17 @@ public class Board {
 
     /**
      * Enum representing directions on the chessboard. Used to generate moves depending on piece
-     * color.
+     * color. Directions are from white's POV.
      */
     enum dir{
         UP,
         DOWN,
         LEFT,
-        RIGHT
+        RIGHT,
+        UP_LEFT,
+        UP_RIGHT,
+        DOWN_LEFT,
+        DOWN_RIGHT
     }
 
     /**
@@ -92,14 +96,12 @@ public class Board {
         } else if (piece.equals("p")) {
             legalMoves = pawnLogic(false);
         }
-        if (piece.equals("R")) {
-            legalMoves = rookLogic(true, originRow, originColumn, boardstate);
-            for(String position : legalMoves) {
+        if (piece.equalsIgnoreCase("R")) {
+            legalMoves = rookLogic(originRow, originColumn, boardstate);
+            for (String position : legalMoves) {
                 int[] coords = coordOfPosition(position);
                 boardstate[coords[0]][coords[1]].setBackground(Color.green);
             }
-        } else if (piece.equals("r")) {
-            legalMoves = rookLogic(false, originRow, originColumn, boardstate);
         }
         if (piece.equals("Q")) {
             legalMoves = queenLogic(true);
@@ -111,10 +113,12 @@ public class Board {
         } else if (piece.equals("k")) {
             legalMoves = kingLogic(false);
         }
-        if (piece.equals("B")) {
-            legalMoves = bishopLogic(true);
-        } else if (piece.equals("b")) {
-            legalMoves = bishopLogic(false);
+        if (piece.equalsIgnoreCase("B")) {
+            legalMoves = bishopLogic(originRow, originColumn, boardstate);
+            for (String position : legalMoves) {
+                int[] coords = coordOfPosition(position);
+                boardstate[coords[0]][coords[1]].setBackground(Color.green);
+            }
         }
         if (piece.equals("N")) {
             legalMoves = knightLogic(true);
@@ -140,30 +144,59 @@ public class Board {
     /**
      * Returns the legalMoves for a rook given the current boardstate.
      */
-    private HashSet<String> rookLogic(boolean white, int originRow, int originColumn, Piece[][] boardstate) {
+    private HashSet<String> rookLogic(int originRow, int originColumn, Piece[][] boardstate) {
         HashSet<String> legalMoves = new HashSet<>();
-        int up = scanNoBounds(dir.UP, originRow, originColumn, boardstate);
-        int down = scanNoBounds(dir.DOWN, originRow, originColumn, boardstate);
-        int right = scanNoBounds(dir.RIGHT, originRow, originColumn, boardstate);
-        int left = scanNoBounds(dir.LEFT, originRow, originColumn, boardstate);
+        int up = scanPerpNoBounds(dir.UP, originRow, originColumn, boardstate);
+        int down = scanPerpNoBounds(dir.DOWN, originRow, originColumn, boardstate);
+        int right = scanPerpNoBounds(dir.RIGHT, originRow, originColumn, boardstate);
+        int left = scanPerpNoBounds(dir.LEFT, originRow, originColumn, boardstate);
         // Forwards and backwards moves
-        for (int i = originRow; i < up; i++) {
+        for (int i = originRow; i < down; i++) {
             legalMoves.add(positionOfCoord(i, originColumn));
         }
-        for (int i = originRow; i > down; i--) {
+        for (int i = originRow; i > up; i--) {
             legalMoves.add(positionOfCoord(i, originColumn));
         }
         // Right and left moves
-        for (int i = originRow; i < right; i++) {
+        for (int i = originColumn; i < right; i++) {
             legalMoves.add(positionOfCoord(originRow, i));
         }
-        for (int i = originRow; i > left; i--) {
+        for (int i = originColumn; i > left; i--) {
             legalMoves.add(positionOfCoord(originRow, i));
         }
         return legalMoves;
     }
-    private HashSet<String> bishopLogic(boolean white) {
-        return new HashSet<>();
+    private HashSet<String> bishopLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        HashSet<String> legalMoves = new HashSet<>();
+        int upleft = scanDiagpNoBounds(dir.UP_LEFT,originRow,originColumn,boardstate);
+        int upright = scanDiagpNoBounds(dir.UP_RIGHT,originRow,originColumn,boardstate);
+        int downleft = scanDiagpNoBounds(dir.DOWN_LEFT,originRow,originColumn,boardstate);
+        int downright = scanDiagpNoBounds(dir.DOWN_RIGHT,originRow,originColumn,boardstate);
+        // Up-left diagonal moves
+        int currentCol = originColumn;
+        for (int i = originRow; i > upleft; i--) {
+            legalMoves.add(positionOfCoord(i,currentCol));
+            currentCol--;
+        }
+        // Up-right diagonal moves
+        currentCol = originColumn;
+        for(int i = originRow; i > upright; i--) {
+            legalMoves.add(positionOfCoord(i,currentCol));
+            currentCol++;
+        }
+        // Down-left diagonal moves
+        currentCol = originColumn;
+        for(int i = originRow; i < downleft; i++) {
+            legalMoves.add(positionOfCoord(i,currentCol));
+            currentCol--;
+        }
+        // Down-right diagonal moves
+        currentCol = originColumn;
+        for(int i = originRow; i < downright; i++) {
+            legalMoves.add(positionOfCoord(i,currentCol));
+            currentCol++;
+        }
+        return legalMoves;
     }
     private HashSet<String> knightLogic(boolean white) {
         return new HashSet<>();
@@ -179,11 +212,11 @@ public class Board {
      * Returns the column or row number of the first square that the piece CANNOT move to. A piece
      * can not move past a piece that is blocking its path.
      */
-    private int scanNoBounds(dir direction, int row, int column, Piece[][] boardstate) {
+    private int scanPerpNoBounds(dir direction, int row, int column, Piece[][] boardstate) {
         int current = 0;
         int color = boardstate[row][column].getColor();
         switch (direction) {
-            case UP:
+            case DOWN:
                 current = row+1;
                 while (current <= 7) {
                     Piece piece = boardstate[current][column];
@@ -198,7 +231,7 @@ public class Board {
                 }
 
                 break;
-            case DOWN:
+            case UP:
                 current = row-1;
                 while (current >= 0) {
                     Piece piece = boardstate[current][column];
@@ -219,6 +252,7 @@ public class Board {
                     if (piece.getType().equals("Empty")) {
                         current++;
                     } else if (piece.getColor() == -color) {
+                        System.out.println("The color is" + -color);
                         current++;
                         break;
                     } else {
@@ -243,8 +277,82 @@ public class Board {
         }
         return current;
     }
-
-
+    /**
+     * Returns the row number of the first square that the piece CANNOT move to. A piece
+     * can not move past a piece that is blocking its path.
+     */
+    private int scanDiagpNoBounds(dir direction, int row, int column, Piece[][] boardstate) {
+        int currentRow = 0;
+        int currentCol = 0;
+        int color = boardstate[row][column].getColor();
+        switch(direction) {
+            case UP_LEFT:
+                currentRow = row - 1;
+                currentCol = column - 1;
+                while (currentRow >= 0 && currentCol >= 0) {
+                    Piece piece = boardstate[currentRow][currentCol];
+                    if (piece.getType().equals("Empty")) {
+                        currentRow--;
+                        currentCol--;
+                    } else if (piece.getColor() == -color) {
+                        currentRow--;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                break;
+            case UP_RIGHT:
+                currentRow = row - 1;
+                currentCol = column + 1;
+                while (currentRow >= 0 && currentCol <= 7) {
+                    Piece piece = boardstate[currentRow][currentCol];
+                    if (piece.getType().equals("Empty")) {
+                        currentRow--;
+                        currentCol++;
+                    } else if (piece.getColor() == -color) {
+                        currentRow--;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                break;
+            case DOWN_LEFT:
+                currentRow = row + 1;
+                currentCol = column - 1;
+                while (currentRow <= 7 && currentCol >= 0) {
+                    Piece piece = boardstate[currentRow][currentCol];
+                    if (piece.getType().equals("Empty")) {
+                        currentRow++;
+                        currentCol--;
+                    } else if (piece.getColor() == -color) {
+                        currentRow++;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                break;
+            case DOWN_RIGHT:
+                currentRow = row + 1;
+                currentCol = column + 1;
+                while (currentRow <= 7 && currentCol <= 7) {
+                    Piece piece = boardstate[currentRow][currentCol];
+                    if (piece.getType().equals("Empty")) {
+                        currentRow++;
+                        currentCol++;
+                    } else if (piece.getColor() == -color) {
+                        currentRow++;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                break;
+        }
+        return currentRow;
+    }
     /**
      * Converts a row and column to a String position.
      */
