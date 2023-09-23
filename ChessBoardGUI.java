@@ -227,10 +227,24 @@ public class ChessBoardGUI {
                     }
                 }
                 break;
-            case WHITE_SELECT:
+            case BLACK:
+                if (chessBoardSquares[row][column].getColor() == 1) {
+                    currentGamestate = gamestate.BLACK_SELECT;
+                    currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
+                    for (String position : currentLegalMoves) {
+                        int[] coords = board.coordOfPosition(position);
+                        chessBoardSquares[coords[0]][coords[1]].setBackground(Color.green);
+                    }
+                }
+                break;
+            case WHITE_SELECT, BLACK_SELECT:
                 // Allow user to deselect the piece they chose
                 if (row == lastclick[0] && column == lastclick[1]) {
-                    currentGamestate = gamestate.WHITE;
+                    if (currentGamestate == gamestate.WHITE_SELECT) {
+                        currentGamestate = gamestate.WHITE;
+                    } else {
+                        currentGamestate = gamestate.BLACK;
+                    }
                     uncolor();
                     break;
                 }
@@ -244,20 +258,20 @@ public class ChessBoardGUI {
                     // UNCOLOR SELECTION
                     uncolor();
                     // MAKE MOVE
-                    currentGamestate = gamestate.BLACK;
-                } else {
-                    currentGamestate = gamestate.WHITE;
+                    if (currentGamestate == gamestate.WHITE_SELECT) {
+                        currentGamestate = gamestate.BLACK;
+                    } else {
+                        currentGamestate = gamestate.WHITE;
+                    }
+                } else { //Illegal move selected, deselect piece
+                    if (currentGamestate == gamestate.WHITE_SELECT) {
+                        currentGamestate = gamestate.WHITE;
+                    } else {
+                        currentGamestate = gamestate.BLACK;
+                    }
                     // UNCOLOR SELECTION
                     uncolor();
                 }
-                break;
-            case BLACK:
-                if (chessBoardSquares[row][column].getColor() == 1) {
-                    currentGamestate = gamestate.BLACK_SELECT;
-                }
-                break;
-            case BLACK_SELECT:
-                currentGamestate = gamestate.WHITE; //Temporary
                 break;
             default:
                 return;
