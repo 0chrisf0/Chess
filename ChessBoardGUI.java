@@ -215,7 +215,7 @@ public class ChessBoardGUI {
      * Handles the movement of the pieces on the GUI. Ensures that moves are legal.
      */
     public void buttonPress(int row, int column) {
-        System.out.println(currentGamestate);
+        System.out.println("On Press: " + currentGamestate);
         switch (currentGamestate) {
             case WHITE:
                 if (chessBoardSquares[row][column].getColor() == -1) {
@@ -264,6 +264,7 @@ public class ChessBoardGUI {
         }
         lastclick[0] = row;
         lastclick[1] = column;
+        System.out.println("On Exit: " + currentGamestate);
     }
 
     /**

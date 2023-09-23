@@ -89,6 +89,7 @@ public class Board {
      * This will make additional features in the future easier.
      */
     public HashSet<String> legalMoves(int originRow, int originColumn, Piece[][] boardstate) {
+        // TODO switch statement instead of if statement chain
         HashSet<String> legalMoves = new HashSet<>();
         String piece = boardstate[originRow][originColumn].getType();
         if (piece.equals("P")) {
@@ -99,10 +100,8 @@ public class Board {
         if (piece.equalsIgnoreCase("R")) {
             legalMoves = rookLogic(originRow, originColumn, boardstate);
         }
-        if (piece.equals("Q")) {
-            legalMoves = queenLogic(true);
-        } else if (piece.equals("q")) {
-            legalMoves = queenLogic(false);
+        if (piece.equalsIgnoreCase("Q")) {
+            legalMoves = queenLogic(originRow, originColumn, boardstate);
         }
         if (piece.equals("K")) {
             legalMoves = kingLogic(true);
@@ -152,6 +151,9 @@ public class Board {
         }
         return legalMoves;
     }
+    /**
+     * Returns the legalMoves for a given rook given the current boardstate.
+     */
     private HashSet<String> bishopLogic(int originRow, int originColumn, Piece[][] boardstate) {
         HashSet<String> legalMoves = new HashSet<>();
         int upleft = scanDiagpNoBounds(dir.UP_LEFT,originRow,originColumn,boardstate);
@@ -187,8 +189,16 @@ public class Board {
     private HashSet<String> knightLogic(boolean white) {
         return new HashSet<>();
     }
-    private HashSet<String> queenLogic(boolean white) {
-        return new HashSet<>();
+
+    /**
+     * Returns the set of legalMoves that the given queen can make given the current boardstate.
+     *
+     */
+    private HashSet<String> queenLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        HashSet<String> rookLegalMoves = rookLogic(originRow, originColumn, boardstate);
+        HashSet<String> bishopLegalMoves = bishopLogic(originRow,originColumn,boardstate);
+        rookLegalMoves.addAll(bishopLegalMoves);
+        return rookLegalMoves;
     }
     private HashSet<String> kingLogic(boolean white) {
         return new HashSet<>();
