@@ -80,6 +80,8 @@ public class Piece extends JButton {
         iconFile = piece.iconFile;
         moved = piece.moved;
         background = getBackground();
+        System.out.println(background);
         setIcon(new ImageIcon(piece.iconFile));
     }
+
 }

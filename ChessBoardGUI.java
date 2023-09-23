@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -67,6 +68,10 @@ public class ChessBoardGUI {
      */
     private int[] lastclick = new int[2];
 
+    /**
+     * Reprsents the current set of legalMoves for the selected piece.
+     */
+    private HashSet<String> currentLegalMoves = new HashSet<>();
 
 
     /**
@@ -167,7 +172,7 @@ public class ChessBoardGUI {
         String[] fields = userInput.split(" ");
         board = new Board(fields);
         String[] ranks = fields[0].split("/");
-        // First Field: pieces and their positions
+        // First Field: pieces and their positions "3R"
         for (int row = 0; row < 8; row++) {
             int column = 0;
             for (int j = 0; j < ranks[row].length(); j++ ) { //j = current index along rank entry
@@ -175,12 +180,18 @@ public class ChessBoardGUI {
                     int empties = Integer.parseInt(ranks[row].substring(j,j+1));
                     for (int k = 0; k < empties; k++) {
                         Piece piece = new Piece("Empty", false);
-                        // Why is this column then rank?
                         chessBoardSquares[row][column].reinitialize(piece);
                         column++;
                     }
                 } catch (NumberFormatException e) {
                     Piece piece = new Piece(ranks[row].substring(j,j+1), false);
+                    chessBoardSquares[row][column].reinitialize(piece);
+                    column++;
+                }
+            } // I don't know if this is needed for valid FENs, but it is convenient
+            if (column != 7) {
+                while (column <= 7) {
+                    Piece piece = new Piece("Empty", false);
                     chessBoardSquares[row][column].reinitialize(piece);
                     column++;
                 }
@@ -204,18 +215,23 @@ public class ChessBoardGUI {
      * Handles the movement of the pieces on the GUI. Ensures that moves are legal.
      */
     public void buttonPress(int row, int column) {
+        System.out.println(currentGamestate);
         switch (currentGamestate) {
             case WHITE:
                 if (chessBoardSquares[row][column].getColor() == -1) {
                     currentGamestate = gamestate.WHITE_SELECT;
-                    chessBoardSquares[row][column].setBackground(Color.green);
+                    currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
+                    for (String position : currentLegalMoves) {
+                        int[] coords = board.coordOfPosition(position);
+                        chessBoardSquares[coords[0]][coords[1]].setBackground(Color.green);
+                    }
                 }
                 break;
             case WHITE_SELECT:
                 // Allow user to deselect the piece they chose
                 if (row == lastclick[0] && column == lastclick[1]) {
                     currentGamestate = gamestate.WHITE;
-                    chessBoardSquares[row][column].originalBackground();
+                    uncolor();
                     break;
                 }
                 // These are the things that need to happen in this case statement (and BLACK_SELECT):
@@ -224,10 +240,15 @@ public class ChessBoardGUI {
                 // otherwise set gamestate back to WHITE or BLACK.
                 // 3. Check for checks on the opposing King
                 // 4. If there is a check, should automatically check for checkmate as well.
-                if (board.checkMove(lastclick[0], lastclick[1], row, column, chessBoardSquares)) {
-
+                if (currentLegalMoves.contains(board.positionOfCoord(row, column))) {
+                    // UNCOLOR SELECTION
+                    uncolor();
+                    // MAKE MOVE
+                    currentGamestate = gamestate.BLACK;
                 } else {
                     currentGamestate = gamestate.WHITE;
+                    // UNCOLOR SELECTION
+                    uncolor();
                 }
                 break;
             case BLACK:
@@ -236,11 +257,23 @@ public class ChessBoardGUI {
                 }
                 break;
             case BLACK_SELECT:
+                currentGamestate = gamestate.WHITE; //Temporary
                 break;
             default:
                 return;
         }
         lastclick[0] = row;
         lastclick[1] = column;
+    }
+
+    /**
+     * Sets all the squares on the chessboard Piece's backgrounds to what they were originally.
+     */
+    public void uncolor() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                chessBoardSquares[i][j].originalBackground();
+            }
+        }
     }
 }
