@@ -156,7 +156,7 @@ public class ChessBoardGUI {
     /**
      * Setup board with pieces given a starting position (FEN).
      * I.e: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-     */
+     */ 
     public void setupBoard() {
         String userInput = JOptionPane.showInputDialog(
                 null, "Input a valid FEN", "Input", JOptionPane.QUESTION_MESSAGE);
