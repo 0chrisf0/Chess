@@ -58,7 +58,8 @@ public class Board {
      * Construct a board object given a starting position.
      * Precondition: startingPosition must be a legal FEN.
      *
-     * I.e. rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+     * E.g. rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+     * E.g. rnbqkbnr/pppppppp/8/8/3R/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
      *
      * Lowercase letters denote black pieces.
      */
@@ -87,8 +88,7 @@ public class Board {
      * Checks whether a given move is legal. In doing so, generates a set of all the legal moves.
      * This will make additional features in the future easier.
      */
-    public boolean checkMove(int originRow, int originColumn,
-            int destinationRow, int destinationColumn, Piece[][] boardstate) {
+    public HashSet<String> legalMoves(int originRow, int originColumn, Piece[][] boardstate) {
         HashSet<String> legalMoves = new HashSet<>();
         String piece = boardstate[originRow][originColumn].getType();
         if (piece.equals("P")) {
@@ -98,10 +98,6 @@ public class Board {
         }
         if (piece.equalsIgnoreCase("R")) {
             legalMoves = rookLogic(originRow, originColumn, boardstate);
-            for (String position : legalMoves) {
-                int[] coords = coordOfPosition(position);
-                boardstate[coords[0]][coords[1]].setBackground(Color.green);
-            }
         }
         if (piece.equals("Q")) {
             legalMoves = queenLogic(true);
@@ -115,10 +111,6 @@ public class Board {
         }
         if (piece.equalsIgnoreCase("B")) {
             legalMoves = bishopLogic(originRow, originColumn, boardstate);
-            for (String position : legalMoves) {
-                int[] coords = coordOfPosition(position);
-                boardstate[coords[0]][coords[1]].setBackground(Color.green);
-            }
         }
         if (piece.equals("N")) {
             legalMoves = knightLogic(true);
@@ -126,14 +118,8 @@ public class Board {
             legalMoves = knightLogic(false);
         }
 
-        if (legalMoves.contains(positionOfCoord(destinationRow, destinationColumn))) {
-            // TODO additionally check here if the move puts the King in check
-            return true;
-        }
-
-        return true;
-        // uncomment
-        // return false;
+       // TODO check for check
+        return legalMoves;
     }
 
     private HashSet<String> pawnLogic(boolean white) {
