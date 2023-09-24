@@ -43,8 +43,18 @@ public class Piece extends JButton {
         setBackground(background);
     }
 
+    /**
+     * Returns the color of this piece as an int.
+     */
     public int getColor() {
         return color;
+    }
+
+    /**
+     * Returns whether this piece has moved.
+     */
+    public boolean getHasMoved() {
+        return moved;
     }
 
     /**

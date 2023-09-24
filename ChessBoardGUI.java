@@ -19,7 +19,12 @@ public class ChessBoardGUI {
     /**
      * brownColor is the RGB value corresponding to the color of the brown chessboard squares.
      */
-    private final int[] brownColor = {145, 98, 94};
+    private final int[] lightBrownColor = {210, 180, 140};
+
+    /**
+     * offBrownColor is the RGB value corresponding to the color fo the offBrown chessboard squares.
+     */
+    private final int[] darkBrownColor = {128, 70, 27};
     /**
      * JPanel that the holds all the chess gui.
      */
@@ -117,6 +122,7 @@ public class ChessBoardGUI {
             for (int jj = 0; jj < chessBoardSquares[ii].length; jj++) {
                 Piece b = new Piece("Empty",false);
                 b.setMargin(buttonMargin);
+                b.setBorder(BorderFactory.createEmptyBorder());
 
                 // our chess pieces are 60x60 px in size, so we'll
                 // 'fill this in' using a transparent icon..
@@ -126,9 +132,9 @@ public class ChessBoardGUI {
                 if ((jj % 2 == 1 && ii % 2 == 1)
                         //) {
                         || (jj % 2 == 0 && ii % 2 == 0)) {
-                    b.setBackground(Color.WHITE);
+                    b.setBackground(new Color(lightBrownColor[0],lightBrownColor[1],lightBrownColor[2]));
                 } else {
-                    b.setBackground(new Color(brownColor[0], brownColor[1], brownColor[2]));
+                    b.setBackground(new Color(darkBrownColor[0], darkBrownColor[1], darkBrownColor[2]));
                 }
                 chessBoardSquares[ii][jj] = b;
                 final int row = ii;
@@ -252,7 +258,7 @@ public class ChessBoardGUI {
                 // 1. Check if the move is legal
                 // 2. IF the move is legal, make the move and update data accordingly (DETECT CHECKS)
                 // otherwise set gamestate back to WHITE or BLACK.
-                // 3. Check for checks on the opposing King
+                // 3. Check for promotion, then check for checks on the opposing King
                 // 4. If there is a check, should automatically check for checkmate as well.
                 if (currentLegalMoves.contains(board.positionOfCoord(row, column))) {
                     // UNCOLOR SELECTION

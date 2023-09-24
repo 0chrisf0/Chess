@@ -89,13 +89,10 @@ public class Board {
      * This will make additional features in the future easier.
      */
     public HashSet<String> legalMoves(int originRow, int originColumn, Piece[][] boardstate) {
-        // TODO switch statement instead of if statement chain
         HashSet<String> legalMoves = new HashSet<>();
         String piece = boardstate[originRow][originColumn].getType();
-        if (piece.equals("P")) {
-            legalMoves = pawnLogic(true);
-        } else if (piece.equals("p")) {
-            legalMoves = pawnLogic(false);
+        if (piece.equalsIgnoreCase("P")) {
+            legalMoves = pawnLogic(originRow, originColumn, boardstate);
         }
         if (piece.equalsIgnoreCase("R")) {
             legalMoves = rookLogic(originRow, originColumn, boardstate);
@@ -111,19 +108,30 @@ public class Board {
         if (piece.equalsIgnoreCase("B")) {
             legalMoves = bishopLogic(originRow, originColumn, boardstate);
         }
-        if (piece.equals("N")) {
-            legalMoves = knightLogic(true);
-        } else if (piece.equals("n")) {
-            legalMoves = knightLogic(false);
+        if (piece.equalsIgnoreCase("N")) {
+            legalMoves = knightLogic(originRow, originColumn, boardstate);
         }
 
-       // TODO check for check
+       // TODO check for check in ChessBoardGUI (call a function in Board from ChessBoardGUI
         return legalMoves;
     }
 
-    private HashSet<String> pawnLogic(boolean white) {
-
-        return new HashSet<>();
+    private HashSet<String> pawnLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        HashSet<String> legalMoves = new HashSet<>();
+        int color = boardstate[originRow][originColumn].getColor();
+        int maxRange = pawnScan(originRow, originColumn, boardstate);
+        System.out.println(maxRange);
+        if (color == -1) { // White Piece
+            for (int i = originRow; i > maxRange; i--) {
+                legalMoves.add(positionOfCoord(i,originColumn));
+            }
+        } else {
+            for (int i = originRow; i < maxRange; i++) {
+                legalMoves.add(positionOfCoord(i,originColumn));
+            }
+        }
+        // TODO add capturing
+        return legalMoves;
     }
 
     /**
@@ -156,10 +164,10 @@ public class Board {
      */
     private HashSet<String> bishopLogic(int originRow, int originColumn, Piece[][] boardstate) {
         HashSet<String> legalMoves = new HashSet<>();
-        int upleft = scanDiagpNoBounds(dir.UP_LEFT,originRow,originColumn,boardstate);
-        int upright = scanDiagpNoBounds(dir.UP_RIGHT,originRow,originColumn,boardstate);
-        int downleft = scanDiagpNoBounds(dir.DOWN_LEFT,originRow,originColumn,boardstate);
-        int downright = scanDiagpNoBounds(dir.DOWN_RIGHT,originRow,originColumn,boardstate);
+        int upleft = scanDiagNoBounds(dir.UP_LEFT,originRow,originColumn,boardstate);
+        int upright = scanDiagNoBounds(dir.UP_RIGHT,originRow,originColumn,boardstate);
+        int downleft = scanDiagNoBounds(dir.DOWN_LEFT,originRow,originColumn,boardstate);
+        int downright = scanDiagNoBounds(dir.DOWN_RIGHT,originRow,originColumn,boardstate);
         // Up-left diagonal moves
         int currentCol = originColumn;
         for (int i = originRow; i > upleft; i--) {
@@ -186,8 +194,59 @@ public class Board {
         }
         return legalMoves;
     }
-    private HashSet<String> knightLogic(boolean white) {
-        return new HashSet<>();
+
+    /**
+     * Returns the set of legalMoves that the given knight can make given the current boardstate.
+     * For Testing: 8/8/2n/8/4N/8/8/8 w KQkq - 0 1
+     *
+     */
+    private HashSet<String> knightLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        // At most 8 possible moves
+        HashSet<String> legalMoves = new HashSet<>();
+        int currentColor = boardstate[originRow][originColumn].getColor();
+        Piece currentLoc = boardstate[originRow-2][originColumn+1];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow-2,originColumn+1));
+        }
+        currentLoc = boardstate[originRow-2][originColumn-1];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow-2,originColumn-1));
+        }
+        currentLoc = boardstate[originRow-1][originColumn-2];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow-1,originColumn-2));
+        }
+        currentLoc = boardstate[originRow-1][originColumn+2];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow-1,originColumn+2));
+        }
+        currentLoc = boardstate[originRow+1][originColumn-2];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow+1,originColumn-2));
+        }
+        currentLoc = boardstate[originRow+1][originColumn+2];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow+1,originColumn+2));
+        }
+        currentLoc = boardstate[originRow+2][originColumn-1];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow+2,originColumn-1));
+        }
+        currentLoc = boardstate[originRow+2][originColumn+1];
+        if (currentLoc.getColor() == 0 ||
+                currentLoc.getColor() == -currentColor) {
+            legalMoves.add(positionOfCoord(originRow+2,originColumn+1));
+        }
+
+
+        return legalMoves;
     }
 
     /**
@@ -248,7 +307,6 @@ public class Board {
                     if (piece.getType().equals("Empty")) {
                         current++;
                     } else if (piece.getColor() == -color) {
-                        System.out.println("The color is" + -color);
                         current++;
                         break;
                     } else {
@@ -277,7 +335,7 @@ public class Board {
      * Returns the row number of the first square that the piece CANNOT move to. A piece
      * can not move past a piece that is blocking its path.
      */
-    private int scanDiagpNoBounds(dir direction, int row, int column, Piece[][] boardstate) {
+    private int scanDiagNoBounds(dir direction, int row, int column, Piece[][] boardstate) {
         int currentRow = 0;
         int currentCol = 0;
         int color = boardstate[row][column].getColor();
@@ -349,6 +407,56 @@ public class Board {
         }
         return currentRow;
     }
+
+    /**
+     * Scans forwards two squares, for pawns. Returns one beyond the furthest spot the pawn can move.
+     * Doesn't consider capturing.
+     */
+    private int pawnScan(int row, int column, Piece[][] boardstate) {
+        int current;
+        int maxRange;
+        if (boardstate[row][column].getColor() == -1) { // WHITE PIECE
+            if (boardstate[row][column].getHasMoved()) {
+                maxRange = row - 2;
+            } else {
+                maxRange = row - 3;
+            }
+            current = row - 1;
+            while (current >= 0) {
+                Piece piece = boardstate[current][column];
+                if (piece.getType().equals("Empty")) {
+                    current--;
+                } else {
+                    break;
+                }
+                if (current == maxRange) { // Ensures pawns can only move the number of places it should
+                    break;
+                }
+            }
+        } else { //BLACK PIECE
+            if (boardstate[row][column].getHasMoved()) {
+                maxRange = row + 2;
+            } else {
+                maxRange = row + 3;
+            }
+            current = row + 1;
+            while (current <= 7) {
+                Piece piece = boardstate[current][column];
+                if (piece.getType().equals("Empty")) {
+                    current++;
+                } else {
+                    break;
+                }
+                if (current == maxRange) { // Ensures pawns can only move the number of places it should
+                    break;
+                }
+            }
+        }
+        System.out.println("Row: " + row);
+        System.out.println(current);
+        return current;
+    }
+
     /**
      * Converts a row and column to a String position.
      */
