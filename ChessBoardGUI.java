@@ -112,7 +112,7 @@ public class ChessBoardGUI {
 
         gui.add(new JLabel("?"), BorderLayout.LINE_START);
 
-        chessBoard = new JPanel(new GridLayout(0, 9));
+        chessBoard = new JPanel(new GridLayout(0, 10));
         chessBoard.setBorder(new LineBorder(Color.BLACK));
         gui.add(chessBoard);
 
@@ -155,20 +155,38 @@ public class ChessBoardGUI {
             label.setBackground(Color.lightGray);
             chessBoard.add(label);
         }
+        // top right corner
+        label1 = new JLabel("");
+        label1.setOpaque(true);
+        label1.setBackground(Color.lightGray);
+        chessBoard.add(label1);
         // fill the rest of the chessBoard
-        for (int ii = 0; ii < 8; ii++) {
-            for (int jj = 0; jj < 8; jj++) {
-                switch (jj) {
+        for (int row = 0; row < 8; row++) {
+            for (int column = 0; column < 9; column++) {
+                switch (column) {
+                    case 8:
+                        JLabel label2 = new JLabel("");
+                        label2.setOpaque(true);
+                        label2.setBackground(Color.lightGray);
+                        chessBoard.add(label2);
+                        break;
                     case 0:
-                        JLabel label = new JLabel("" + (8- ii),
+                        JLabel label = new JLabel("" + (8 - row),
                                 SwingConstants.CENTER);
                         label.setOpaque(true);
                         label.setBackground(Color.lightGray);
                         chessBoard.add(label);
                     default:
-                        chessBoard.add(chessBoardSquares[ii][jj]);
+                        chessBoard.add(chessBoardSquares[row][column]);
                 }
             }
+        }
+        // fill the bottom row of the chessBoard
+        for (int ii = 0; ii < 10; ii++) {
+            JLabel label = new JLabel("");
+            label.setOpaque(true);
+            label.setBackground(Color.lightGray);
+            chessBoard.add(label);
         }
     }
 
