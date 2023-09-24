@@ -120,17 +120,41 @@ public class Board {
         HashSet<String> legalMoves = new HashSet<>();
         int color = boardstate[originRow][originColumn].getColor();
         int maxRange = pawnScan(originRow, originColumn, boardstate);
-        System.out.println(maxRange);
         if (color == -1) { // White Piece
             for (int i = originRow; i > maxRange; i--) {
                 legalMoves.add(positionOfCoord(i,originColumn));
             }
+            try {
+                if (boardstate[originRow-1][originColumn-1].getColor() == 1) {
+                    legalMoves.add(positionOfCoord(originRow - 1, originColumn - 1));
+                }
+            } catch (IndexOutOfBoundsException e) {
+            }
+            try {
+                if (boardstate[originRow-1][originColumn+1].getColor() == 1) {
+                    legalMoves.add(positionOfCoord(originRow - 1, originColumn + 1));
+                }
+            } catch (IndexOutOfBoundsException e) {
+            }
+
         } else {
             for (int i = originRow; i < maxRange; i++) {
                 legalMoves.add(positionOfCoord(i,originColumn));
             }
+            try {
+                if (boardstate[originRow+1][originColumn-1].getColor() == -1) {
+                    legalMoves.add(positionOfCoord(originRow + 1, originColumn - 1));
+                }
+            } catch (IndexOutOfBoundsException e) {
+            }
+            try {
+                if (boardstate[originRow+1][originColumn+1].getColor() == -1) {
+                    legalMoves.add(positionOfCoord(originRow + 1, originColumn + 1));
+                }
+            } catch (IndexOutOfBoundsException e) {
+            }
         }
-        // TODO add capturing
+        // TODO add en passant
         return legalMoves;
     }
 
@@ -452,8 +476,6 @@ public class Board {
                 }
             }
         }
-        System.out.println("Row: " + row);
-        System.out.println(current);
         return current;
     }
 

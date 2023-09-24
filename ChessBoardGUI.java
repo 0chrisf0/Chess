@@ -122,7 +122,7 @@ public class ChessBoardGUI {
             for (int jj = 0; jj < chessBoardSquares[ii].length; jj++) {
                 Piece b = new Piece("Empty",false);
                 b.setMargin(buttonMargin);
-                b.setBorder(BorderFactory.createEmptyBorder());
+                b.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
                 // our chess pieces are 60x60 px in size, so we'll
                 // 'fill this in' using a transparent icon..
@@ -143,20 +143,28 @@ public class ChessBoardGUI {
             }
         }
         //fill the chess board
-        chessBoard.add(new JLabel(""));
+        JLabel label1 = new JLabel("");
+        label1.setOpaque(true);
+        label1.setBackground(Color.lightGray);
+        chessBoard.add(label1);
         // fill the top row
         for (int ii = 0; ii < 8; ii++) {
-            chessBoard.add(
-                    new JLabel(COLS.substring(ii, ii + 1),
-                            SwingConstants.CENTER));
+            JLabel label = new JLabel(COLS.substring(ii, ii + 1),
+                    SwingConstants.CENTER);
+            label.setOpaque(true);
+            label.setBackground(Color.lightGray);
+            chessBoard.add(label);
         }
         // fill the rest of the chessBoard
         for (int ii = 0; ii < 8; ii++) {
             for (int jj = 0; jj < 8; jj++) {
                 switch (jj) {
                     case 0:
-                        chessBoard.add(new JLabel("" + (8- ii),
-                                SwingConstants.CENTER));
+                        JLabel label = new JLabel("" + (8- ii),
+                                SwingConstants.CENTER);
+                        label.setOpaque(true);
+                        label.setBackground(Color.lightGray);
+                        chessBoard.add(label);
                     default:
                         chessBoard.add(chessBoardSquares[ii][jj]);
                 }
