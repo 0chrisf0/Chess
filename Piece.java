@@ -34,7 +34,10 @@ public class Piece extends JButton {
      * The original background color of this square.
      */
     private Color background;
-
+    /**
+     * Whether the piece is in an absolute pin against the King.
+     */
+    private Boolean pinned = false;
     /**
      * Sets the background color to the original one
      * @return

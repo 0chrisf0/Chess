@@ -10,16 +10,16 @@ public class GameMain {
     private static void createAndShowGUI() {
         // Create frame.
         JFrame frame = new JFrame("Chess");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         ChessBoardGUI cb = new ChessBoardGUI();
         frame.add(cb.getGui());
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLocationByPlatform(true);
+        frame.setResizable(false);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
 
 
         // Compute ideal window size and show window.
-        frame.pack();
         frame.setVisible(true);
 
 

@@ -110,7 +110,7 @@ public class ChessBoardGUI {
         tools.addSeparator();
         tools.add(message);
 
-        gui.add(new JLabel("?"), BorderLayout.LINE_START);
+        gui.add(new JLabel(""), BorderLayout.LINE_START);
 
         chessBoard = new JPanel(new GridLayout(0, 10));
         chessBoard.setBorder(new LineBorder(Color.BLACK));
@@ -145,20 +145,20 @@ public class ChessBoardGUI {
         //fill the chess board
         JLabel label1 = new JLabel("");
         label1.setOpaque(true);
-        label1.setBackground(Color.lightGray);
+        label1.setBackground(Color.gray);
         chessBoard.add(label1);
         // fill the top row
         for (int ii = 0; ii < 8; ii++) {
             JLabel label = new JLabel(COLS.substring(ii, ii + 1),
                     SwingConstants.CENTER);
             label.setOpaque(true);
-            label.setBackground(Color.lightGray);
+            label.setBackground(Color.gray);
             chessBoard.add(label);
         }
         // top right corner
         label1 = new JLabel("");
         label1.setOpaque(true);
-        label1.setBackground(Color.lightGray);
+        label1.setBackground(Color.gray);
         chessBoard.add(label1);
         // fill the rest of the chessBoard
         for (int row = 0; row < 8; row++) {
@@ -167,14 +167,14 @@ public class ChessBoardGUI {
                     case 8:
                         JLabel label2 = new JLabel("");
                         label2.setOpaque(true);
-                        label2.setBackground(Color.lightGray);
+                        label2.setBackground(Color.gray);
                         chessBoard.add(label2);
                         break;
                     case 0:
                         JLabel label = new JLabel("" + (8 - row),
                                 SwingConstants.CENTER);
                         label.setOpaque(true);
-                        label.setBackground(Color.lightGray);
+                        label.setBackground(Color.gray);
                         chessBoard.add(label);
                     default:
                         chessBoard.add(chessBoardSquares[row][column]);
@@ -185,7 +185,7 @@ public class ChessBoardGUI {
         for (int ii = 0; ii < 10; ii++) {
             JLabel label = new JLabel("");
             label.setOpaque(true);
-            label.setBackground(Color.lightGray);
+            label.setBackground(Color.gray);
             chessBoard.add(label);
         }
     }

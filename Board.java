@@ -20,7 +20,7 @@ public class Board {
 
     /**
      * En passantable pawn positions.
-     */ //TODO storing as a set for now until implemented
+     */
     private HashSet<String> passant = new HashSet<>();
 
     /**
@@ -89,6 +89,9 @@ public class Board {
      * This will make additional features in the future easier.
      */
     public HashSet<String> legalMoves(int originRow, int originColumn, Piece[][] boardstate) {
+        for(String e : passant) {
+            System.out.println(e);
+        }
         HashSet<String> legalMoves = new HashSet<>();
         String piece = boardstate[originRow][originColumn].getType();
         if (piece.equalsIgnoreCase("P")) {
@@ -116,6 +119,9 @@ public class Board {
         return legalMoves;
     }
 
+    /**
+     * Returns the legalMoves for a given pawn given the current boardstate.
+     */
     private HashSet<String> pawnLogic(int originRow, int originColumn, Piece[][] boardstate) {
         HashSet<String> legalMoves = new HashSet<>();
         int color = boardstate[originRow][originColumn].getColor();
@@ -125,13 +131,15 @@ public class Board {
                 legalMoves.add(positionOfCoord(i,originColumn));
             }
             try {
-                if (boardstate[originRow-1][originColumn-1].getColor() == 1) {
+                if (boardstate[originRow-1][originColumn-1].getColor() == 1 ||
+                        passant.contains(positionOfCoord(originRow-1,originColumn-1)) ) {
                     legalMoves.add(positionOfCoord(originRow - 1, originColumn - 1));
                 }
             } catch (IndexOutOfBoundsException e) {
             }
             try {
-                if (boardstate[originRow-1][originColumn+1].getColor() == 1) {
+                if (boardstate[originRow-1][originColumn+1].getColor() == 1 ||
+                        passant.contains(positionOfCoord(originRow-1,originColumn+1))) {
                     legalMoves.add(positionOfCoord(originRow - 1, originColumn + 1));
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -142,13 +150,15 @@ public class Board {
                 legalMoves.add(positionOfCoord(i,originColumn));
             }
             try {
-                if (boardstate[originRow+1][originColumn-1].getColor() == -1) {
+                if (boardstate[originRow+1][originColumn-1].getColor() == -1 ||
+                        passant.contains(positionOfCoord(originRow+1,originColumn-1))) {
                     legalMoves.add(positionOfCoord(originRow + 1, originColumn - 1));
                 }
             } catch (IndexOutOfBoundsException e) {
             }
             try {
-                if (boardstate[originRow+1][originColumn+1].getColor() == -1) {
+                if (boardstate[originRow+1][originColumn+1].getColor() == -1 ||
+                        passant.contains(positionOfCoord(originRow+1,originColumn+1))) {
                     legalMoves.add(positionOfCoord(originRow + 1, originColumn + 1));
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -477,6 +487,61 @@ public class Board {
             }
         }
         return current;
+    }
+
+    /**
+     * Finds where the kings are on the board.
+     */
+    private String findKings(int color, Piece[][] boardstate) {
+        for (int row = 0; row < 8; row++) { //TODO more efficient way of finding the king?
+            for (int column = 0; column < 8; column++) {
+                if (boardstate[row][column].getType().equals("K") && color == -1) {
+                    return positionOfCoord(row, column);
+                } else if (boardstate[row][column].getType().equals("k") && color == 1) {
+                    return positionOfCoord(row,column);
+                }
+            }
+        }
+
+    }
+
+
+    /**
+     * This function detects check. Additionally, it updates the pin status of any pieces that are
+     * pinned. This works because check detection will happen at the end of every turn anyways. This
+     * function should be called at the beginning of the game and then after each turn.
+     */
+    public Boolean detectCheckUpdateXray(int color, Piece[][] boardstate) {
+        String king = findKings(color, boardstate);
+        int row = coordOfPosition(king)[0];
+        int column = coordOfPosition(king)[1];
+       // White piece...
+        if (color == -1) {
+
+            int up = scanPerpNoBounds(dir.UP, row, column, boardstate);
+            Piece currentPiece = boardstate[up + 1][column];
+            if (currentPiece.getType().equals("r")) {
+                System.out.println("The King is in Check?"); //TODO is this always true?
+            } else {
+                // TODO look for XRAY attack
+            }
+
+            int down = scanPerpNoBounds(dir.DOWN, row, column, boardstate);
+            int right = scanPerpNoBounds(dir.RIGHT, row, column, boardstate);
+            int left = scanPerpNoBounds(dir.LEFT, row, column, boardstate);
+
+            int upleft = scanDiagNoBounds(dir.UP_LEFT, row, column, boardstate);
+            int upright = scanDiagNoBounds(dir.UP_RIGHT, row, column, boardstate);
+            int downleft = scanDiagNoBounds(dir.DOWN_LEFT, row, column, boardstate);
+            int downright = scanDiagNoBounds(dir.DOWN_RIGHT, row, column, boardstate);
+        } else { // Black king...
+
+        }
+
+
+
+
+        return false; // Temporary?... maybe not
     }
 
     /**
