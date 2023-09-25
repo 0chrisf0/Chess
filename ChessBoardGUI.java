@@ -231,10 +231,17 @@ public class ChessBoardGUI {
         }
     }
 
+    /**
+     * Starts the game, initializing the gamestate to the correct turn
+     */
     public void startGame() {
         if (board == null) {
             return;
         }
+        // Need two calls here because we need to update Xrays for all pieces
+        board.detectCheckUpdateXray(-1, chessBoardSquares);
+        board.detectCheckUpdateXray(1,chessBoardSquares);
+
         if (board.getTurn().equals("w")) {
             currentGamestate = gamestate.WHITE;
         } else {
@@ -287,9 +294,13 @@ public class ChessBoardGUI {
                 // 3. Check for promotion, then check for checks on the opposing King
                 // 4. If there is a check, should automatically check for checkmate as well.
                 if (currentLegalMoves.contains(board.positionOfCoord(row, column))) {
-                    // UNCOLOR SELECTION
-                    uncolor();
+
                     // MAKE MOVE
+
+                    // Uncolor Selection and Check for Checks and update XRAY status
+                    // TODO make one function that loops over the entire board once and does this
+                    // (will need to loop board to check for pieces that are no longer pinned)
+                    uncolor();
                     if (currentGamestate == gamestate.WHITE_SELECT) {
                         currentGamestate = gamestate.BLACK;
                     } else {

@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.HashSet;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -34,10 +35,16 @@ public class Piece extends JButton {
      * The original background color of this square.
      */
     private Color background;
+
     /**
-     * Whether the piece is in an absolute pin against the King.
+     * The direction the piece is pinned against. If the set is empty, there
      */
-    private Boolean pinned = false;
+    private HashSet<Board.dir> pinned = new HashSet<>();
+
+    public void addPin(Board.dir direction) {
+        pinned.add(direction);
+    }
+
     /**
      * Sets the background color to the original one
      * @return

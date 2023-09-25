@@ -37,7 +37,7 @@ public class Board {
      * Enum representing directions on the chessboard. Used to generate moves depending on piece
      * color. Directions are from white's POV.
      */
-    enum dir{
+    public enum dir{
         UP,
         DOWN,
         LEFT,
@@ -502,7 +502,7 @@ public class Board {
                 }
             }
         }
-
+        return null;
     }
 
 
@@ -510,40 +510,271 @@ public class Board {
      * This function detects check. Additionally, it updates the pin status of any pieces that are
      * pinned. This works because check detection will happen at the end of every turn anyways. This
      * function should be called at the beginning of the game and then after each turn.
+     *
+     * Test FENs: (must always have two kings)
+     * UP: 2k/4r/8/8/8/8/4R/4K w KQkq - 0 1
+     * UP: 2k/4r/8/8/8/4R/8/4K w KQkq - 0 1
+     * UP: k5K/8/8/8/8/8/8/8 b KQkq - 0 1
+     * UP CHECK: 2k/4r/8/8/8/8/8/4K w KQkq - 0 1
+     *
+     * DOWN: 4K/4R/8/8/8/8/4r/2k w KQkq - 0 1
+     *
+     * RIGHT: K1R3r/8/8/8/8/8/8/k w KQkq - 0 1
+     *
+     * LEFT: r3R1K1/8/8/8/8/8/8/k b KQkq - 0 1
+     *
+     * UPLEFT: b/8/2P/8/4K/8/8/k w KQkq - 0 1
+     * UPLEFT: b/8/8/8/4K/8/8/k w KQkq - 0 1
+     *
+     * UPRIGHT: 7b/8/5P/8/3K/8/8/k w KQkq - 0 1
+     *
+     * DOWNRIGHT: k/8/8/3K/8/5P/8/7b w KQkq - 0 1
+     *
+     * DOWNLEFT: k/8/8/4K/8/2P/8/b w KQkq - 0 1
      */
     public Boolean detectCheckUpdateXray(int color, Piece[][] boardstate) {
+        // TODO make a helper for this function
+        Boolean check = false;
         String king = findKings(color, boardstate);
+        System.out.println("King: " + king);
         int row = coordOfPosition(king)[0];
         int column = coordOfPosition(king)[1];
-       // White piece...
+       // White piece... CASE of piece type matters throughout this if and the corresponding else
         if (color == -1) {
 
-            int up = scanPerpNoBounds(dir.UP, row, column, boardstate);
-            Piece currentPiece = boardstate[up + 1][column];
-            if (currentPiece.getType().equals("r")) {
+            int up = scanAdjust(row,column,dir.UP,boardstate);
+            Piece currentPiece = boardstate[up][column];
+            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
                 System.out.println("The King is in Check?"); //TODO is this always true?
-            } else {
-                // TODO look for XRAY attack
+                check = true;
+            } else if (currentPiece.getColor() == -1) { // Only allied pieces can be pinned
+                int up_next = scanAdjust(up,column, dir.UP, boardstate);
+                Piece thisPiece = boardstate[up_next][column];
+                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
+                    currentPiece.addPin(dir.UP);
+                }
             }
 
-            int down = scanPerpNoBounds(dir.DOWN, row, column, boardstate);
-            int right = scanPerpNoBounds(dir.RIGHT, row, column, boardstate);
-            int left = scanPerpNoBounds(dir.LEFT, row, column, boardstate);
+            int down = scanAdjust(row,column,dir.DOWN,boardstate);
+            currentPiece = boardstate[down][column];
+            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
+                System.out.println("The King is in Check?");
+                check = true;
+            } else if (currentPiece.getColor() == -1) {
+                int down_next = scanAdjust(down, column, dir.DOWN, boardstate);
+                Piece thisPiece = boardstate[down_next][column];
+                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
+                    currentPiece.addPin(dir.DOWN);
+                }
+            }
 
-            int upleft = scanDiagNoBounds(dir.UP_LEFT, row, column, boardstate);
-            int upright = scanDiagNoBounds(dir.UP_RIGHT, row, column, boardstate);
-            int downleft = scanDiagNoBounds(dir.DOWN_LEFT, row, column, boardstate);
-            int downright = scanDiagNoBounds(dir.DOWN_RIGHT, row, column, boardstate);
+            int right = scanAdjust(row,column,dir.RIGHT, boardstate);
+            currentPiece = boardstate[row][right];
+            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
+                check = true;
+            } else if (currentPiece.getColor() == -1) {
+                int right_next = scanAdjust(row, right, dir.RIGHT, boardstate);
+                Piece thisPiece = boardstate[row][right_next];
+                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
+                    currentPiece.addPin(dir.RIGHT);
+                }
+            }
+
+            int left = scanAdjust(row,column,dir.LEFT, boardstate);
+            currentPiece = boardstate[row][left];
+            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
+                System.out.println("The King is in Check?");
+                check = true;
+            } else if (currentPiece.getColor() == -1) {
+                int left_next = scanAdjust(row, left, dir.LEFT, boardstate);
+                Piece thisPiece = boardstate[row][left_next];
+                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
+                    System.out.println("PINNED LEFT");
+                    currentPiece.addPin(dir.LEFT);
+                }
+            }
+            // For diagonals, finding which column value to plug in to get the piece will likely
+            // be a difference of scanResult and king row position
+            int upLeft = scanAdjust(row, column, dir.UP_LEFT, boardstate);
+            int newColumn = column-(row - upLeft);
+            currentPiece = boardstate[upLeft][newColumn];
+            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
+                System.out.println("The King is in Check?");
+                check = true;
+            } else if (currentPiece.getColor() == -1) {
+                int upLeft_next = scanAdjust(upLeft, newColumn, dir.UP_LEFT, boardstate);
+                Piece thisPiece = boardstate[upLeft_next][newColumn-(upLeft - upLeft_next)];
+                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
+                    System.out.println("PINNED UPLEFT");
+                    currentPiece.addPin(dir.UP_LEFT);
+                }
+            }
+
+            int upRight = scanAdjust(row, column, dir.UP_RIGHT, boardstate);
+            newColumn = column+(row - upRight);
+            currentPiece = boardstate[upRight][newColumn];
+            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
+                System.out.println("The King is in Check?");
+                check = true;
+            } else if (currentPiece.getColor() == -1) {
+                int upRight_next = scanAdjust(upRight, newColumn, dir.UP_RIGHT, boardstate);
+                Piece thisPiece = boardstate[upRight_next][newColumn+(upRight - upRight_next)];
+                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
+                    System.out.println("PINNED UPRIGHT");
+                    currentPiece.addPin(dir.UP_RIGHT);
+                }
+            }
+
+            int downRight = scanAdjust(row, column, dir.DOWN_RIGHT, boardstate);
+            newColumn = column+(downRight-row);
+            currentPiece = boardstate[downRight][newColumn];
+            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
+                System.out.println("The King is in Check?");
+                check = true;
+            } else if (currentPiece.getColor() == -1) {
+                int downRight_next = scanAdjust(downRight, newColumn, dir.DOWN_RIGHT, boardstate);
+                Piece thisPiece = boardstate[downRight_next][newColumn+(downRight_next-downRight)];
+                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
+                    System.out.println("PINNED DOWNRIGHT");
+                    currentPiece.addPin(dir.DOWN_RIGHT);
+                }
+            }
+
+            int downLeft = scanAdjust(row, column, dir.DOWN_LEFT, boardstate);
+            newColumn = column-(downLeft-row);
+            currentPiece = boardstate[downLeft][newColumn];
+            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
+                System.out.println("The King is in Check?");
+                check = true;
+            } else if (currentPiece.getColor() == -1) {
+                int downLeft_next = scanAdjust(downLeft, newColumn, dir.DOWN_LEFT, boardstate);
+                Piece thisPiece = boardstate[downLeft_next][newColumn-(downLeft_next-downLeft)];
+                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
+                    System.out.println("PINNED DOWNLEFT");
+                    currentPiece.addPin(dir.DOWN_LEFT);
+                }
+            }
         } else { // Black king...
 
         }
-
-
-
-
-        return false; // Temporary?... maybe not
+        return check;
     }
 
+    private Boolean detectCheckHelper (int color, Piece[][] boardstate) {
+
+
+    }
+    /**
+     * Adjusts a scan result to match the actual location of the piece
+     */
+    private int scanAdjust(int row, int column, dir direction, Piece[][] boardstate) {
+        int scanResult = 0;
+        int adjustmentRow = 0;
+        int adjustmentCol = 0;
+        switch (direction) {
+            case UP:
+                scanResult = scanPerpNoBounds(dir.UP, row, column, boardstate);
+                adjustmentRow = 1;
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[scanResult][column].getColor() == 0) {
+                        return scanResult + adjustmentRow;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentRow;
+                }
+                break;
+            case DOWN:
+                scanResult = scanPerpNoBounds(dir.DOWN, row, column, boardstate);
+                adjustmentRow = -1;
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[scanResult][column].getColor() == 0) {
+                        return scanResult + adjustmentRow;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentRow;
+                }
+                break;
+            case LEFT:
+                scanResult = scanPerpNoBounds(dir.LEFT, row, column, boardstate);
+                adjustmentCol = 1;
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[row][scanResult].getColor() == 0) {
+                        return scanResult + adjustmentCol;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentCol;
+                }
+                break;
+            case RIGHT:
+                scanResult = scanPerpNoBounds(dir.RIGHT, row, column, boardstate);
+                adjustmentCol = -1;
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[row][scanResult].getColor() == 0) {
+                        return scanResult + adjustmentCol;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentCol;
+                }
+                break;
+            case UP_RIGHT:
+                scanResult = scanDiagNoBounds(dir.UP_RIGHT, row, column, boardstate);
+                adjustmentRow = 1;
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[scanResult][column+(row-scanResult)].getColor() == 0) {
+                        return scanResult + adjustmentRow;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentRow;
+                }
+                break;
+            case UP_LEFT:
+                scanResult = scanDiagNoBounds(dir.UP_LEFT, row, column, boardstate);
+                adjustmentRow = 1;
+                // If King in top left, scan result will be -1
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[scanResult][column-(row-scanResult)].getColor() == 0) {
+                        return scanResult + adjustmentRow;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentRow;
+                }
+                break;
+            case DOWN_LEFT:
+                scanResult = scanDiagNoBounds(dir.DOWN_LEFT, row, column, boardstate);
+                adjustmentRow = -1;
+                // If King in top left, scan result will be -1
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[scanResult][column-(scanResult-row)].getColor() == 0) {
+                        return scanResult + adjustmentRow;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentRow;
+                }
+                break;
+            case DOWN_RIGHT:
+                scanResult = scanDiagNoBounds(dir.DOWN_RIGHT, row, column, boardstate);
+                adjustmentRow = -1;
+                // If King in top left, scan result will be -1
+                try {
+                    // This means the piece we encountered is black
+                    if (boardstate[scanResult][column+(scanResult-row)].getColor() == 0) {
+                        return scanResult + adjustmentRow;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return scanResult + adjustmentRow;
+                }
+                break;
+        }
+
+        return scanResult; // Return original scan if no change made
+    }
     /**
      * Converts a row and column to a String position.
      */
