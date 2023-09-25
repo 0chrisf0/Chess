@@ -532,137 +532,137 @@ public class Board {
      *
      * DOWNLEFT: k/8/8/4K/8/2P/8/b w KQkq - 0 1
      */
-    public Boolean detectCheckUpdateXray(int color, Piece[][] boardstate) {
+    public Boolean detectCheckUpdateXray(Piece[][] boardstate) {
         // TODO make a helper for this function
-        Boolean check = false;
-        String king = findKings(color, boardstate);
-        System.out.println("King: " + king);
-        int row = coordOfPosition(king)[0];
-        int column = coordOfPosition(king)[1];
-       // White piece... CASE of piece type matters throughout this if and the corresponding else
-        if (color == -1) {
-
-            int up = scanAdjust(row,column,dir.UP,boardstate);
-            Piece currentPiece = boardstate[up][column];
-            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
-                System.out.println("The King is in Check?"); //TODO is this always true?
-                check = true;
-            } else if (currentPiece.getColor() == -1) { // Only allied pieces can be pinned
-                int up_next = scanAdjust(up,column, dir.UP, boardstate);
-                Piece thisPiece = boardstate[up_next][column];
-                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
-                    currentPiece.addPin(dir.UP);
-                }
-            }
-
-            int down = scanAdjust(row,column,dir.DOWN,boardstate);
-            currentPiece = boardstate[down][column];
-            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
-                System.out.println("The King is in Check?");
-                check = true;
-            } else if (currentPiece.getColor() == -1) {
-                int down_next = scanAdjust(down, column, dir.DOWN, boardstate);
-                Piece thisPiece = boardstate[down_next][column];
-                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
-                    currentPiece.addPin(dir.DOWN);
-                }
-            }
-
-            int right = scanAdjust(row,column,dir.RIGHT, boardstate);
-            currentPiece = boardstate[row][right];
-            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
-                check = true;
-            } else if (currentPiece.getColor() == -1) {
-                int right_next = scanAdjust(row, right, dir.RIGHT, boardstate);
-                Piece thisPiece = boardstate[row][right_next];
-                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
-                    currentPiece.addPin(dir.RIGHT);
-                }
-            }
-
-            int left = scanAdjust(row,column,dir.LEFT, boardstate);
-            currentPiece = boardstate[row][left];
-            if (currentPiece.getType().equals("r") || currentPiece.getType().equals("q")) {
-                System.out.println("The King is in Check?");
-                check = true;
-            } else if (currentPiece.getColor() == -1) {
-                int left_next = scanAdjust(row, left, dir.LEFT, boardstate);
-                Piece thisPiece = boardstate[row][left_next];
-                if (thisPiece.getType().equals("r") || thisPiece.getType().equals("q")) {
-                    System.out.println("PINNED LEFT");
-                    currentPiece.addPin(dir.LEFT);
-                }
-            }
-            // For diagonals, finding which column value to plug in to get the piece will likely
-            // be a difference of scanResult and king row position
-            int upLeft = scanAdjust(row, column, dir.UP_LEFT, boardstate);
-            int newColumn = column-(row - upLeft);
-            currentPiece = boardstate[upLeft][newColumn];
-            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
-                System.out.println("The King is in Check?");
-                check = true;
-            } else if (currentPiece.getColor() == -1) {
-                int upLeft_next = scanAdjust(upLeft, newColumn, dir.UP_LEFT, boardstate);
-                Piece thisPiece = boardstate[upLeft_next][newColumn-(upLeft - upLeft_next)];
-                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
-                    System.out.println("PINNED UPLEFT");
-                    currentPiece.addPin(dir.UP_LEFT);
-                }
-            }
-
-            int upRight = scanAdjust(row, column, dir.UP_RIGHT, boardstate);
-            newColumn = column+(row - upRight);
-            currentPiece = boardstate[upRight][newColumn];
-            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
-                System.out.println("The King is in Check?");
-                check = true;
-            } else if (currentPiece.getColor() == -1) {
-                int upRight_next = scanAdjust(upRight, newColumn, dir.UP_RIGHT, boardstate);
-                Piece thisPiece = boardstate[upRight_next][newColumn+(upRight - upRight_next)];
-                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
-                    System.out.println("PINNED UPRIGHT");
-                    currentPiece.addPin(dir.UP_RIGHT);
-                }
-            }
-
-            int downRight = scanAdjust(row, column, dir.DOWN_RIGHT, boardstate);
-            newColumn = column+(downRight-row);
-            currentPiece = boardstate[downRight][newColumn];
-            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
-                System.out.println("The King is in Check?");
-                check = true;
-            } else if (currentPiece.getColor() == -1) {
-                int downRight_next = scanAdjust(downRight, newColumn, dir.DOWN_RIGHT, boardstate);
-                Piece thisPiece = boardstate[downRight_next][newColumn+(downRight_next-downRight)];
-                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
-                    System.out.println("PINNED DOWNRIGHT");
-                    currentPiece.addPin(dir.DOWN_RIGHT);
-                }
-            }
-
-            int downLeft = scanAdjust(row, column, dir.DOWN_LEFT, boardstate);
-            newColumn = column-(downLeft-row);
-            currentPiece = boardstate[downLeft][newColumn];
-            if (currentPiece.getType().equals("b") || currentPiece.getType().equals("q")) {
-                System.out.println("The King is in Check?");
-                check = true;
-            } else if (currentPiece.getColor() == -1) {
-                int downLeft_next = scanAdjust(downLeft, newColumn, dir.DOWN_LEFT, boardstate);
-                Piece thisPiece = boardstate[downLeft_next][newColumn-(downLeft_next-downLeft)];
-                if (thisPiece.getType().equals("b") || thisPiece.getType().equals("q")) {
-                    System.out.println("PINNED DOWNLEFT");
-                    currentPiece.addPin(dir.DOWN_LEFT);
-                }
-            }
-        } else { // Black king...
-
-        }
-        return check;
+        return detectCheckHelper(-1,boardstate) || detectCheckHelper(1,boardstate);
     }
 
     private Boolean detectCheckHelper (int color, Piece[][] boardstate) {
+        HashSet<String> perpThreats = new HashSet<>();
+        HashSet<String> diagThreats = new HashSet<>();
+        if (color == -1) {
+            perpThreats.add("r");
+            perpThreats.add("q");
+            diagThreats.add("b");
+        } else {
+            perpThreats.add("R");
+            perpThreats.add("Q");
+            diagThreats.add("B");
+        }
 
+        Boolean check = false;
+        String king = findKings(color, boardstate);
+        int row = coordOfPosition(king)[0];
+        int column = coordOfPosition(king)[1];
+        int up = scanAdjust(row,column,dir.UP,boardstate);
+        Piece currentPiece = boardstate[up][column];
+        if (perpThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check?"); //TODO is this always true?
+            check = true;
+        } else if (currentPiece.getColor() == color) { // Only allied pieces can be pinned
+            int up_next = scanAdjust(up,column, dir.UP, boardstate);
+            Piece thisPiece = boardstate[up_next][column];
+            if (perpThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.UP);
+            }
+        }
 
+        int down = scanAdjust(row,column,dir.DOWN,boardstate);
+        currentPiece = boardstate[down][column];
+        if (perpThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check?");
+            check = true;
+        } else if (currentPiece.getColor() == color) {
+            int down_next = scanAdjust(down, column, dir.DOWN, boardstate);
+            Piece thisPiece = boardstate[down_next][column];
+            if (perpThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.DOWN);
+            }
+        }
+
+        int right = scanAdjust(row,column,dir.RIGHT, boardstate);
+        currentPiece = boardstate[row][right];
+        if (perpThreats.contains(currentPiece.getType())) {
+            check = true;
+        } else if (currentPiece.getColor() == color) {
+            int right_next = scanAdjust(row, right, dir.RIGHT, boardstate);
+            Piece thisPiece = boardstate[row][right_next];
+            if (perpThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.RIGHT);
+            }
+        }
+
+        int left = scanAdjust(row,column,dir.LEFT, boardstate);
+        currentPiece = boardstate[row][left];
+        if (perpThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check?");
+            check = true;
+        } else if (currentPiece.getColor() == color) {
+            int left_next = scanAdjust(row, left, dir.LEFT, boardstate);
+            Piece thisPiece = boardstate[row][left_next];
+            if (perpThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.LEFT);
+            }
+        }
+        // For diagonals, finding which column value to plug in to get the piece will likely
+        // be a difference of scanResult and king row position
+        int upLeft = scanAdjust(row, column, dir.UP_LEFT, boardstate);
+        int newColumn = column-(row - upLeft);
+        currentPiece = boardstate[upLeft][newColumn];
+        if (diagThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check?");
+            check = true;
+        } else if (currentPiece.getColor() == color) {
+            int upLeft_next = scanAdjust(upLeft, newColumn, dir.UP_LEFT, boardstate);
+            Piece thisPiece = boardstate[upLeft_next][newColumn-(upLeft - upLeft_next)];
+            if (diagThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.UP_LEFT);
+            }
+        }
+
+        int upRight = scanAdjust(row, column, dir.UP_RIGHT, boardstate);
+        newColumn = column+(row - upRight);
+        currentPiece = boardstate[upRight][newColumn];
+        if (diagThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check?");
+            check = true;
+        } else if (currentPiece.getColor() == color) {
+            int upRight_next = scanAdjust(upRight, newColumn, dir.UP_RIGHT, boardstate);
+            Piece thisPiece = boardstate[upRight_next][newColumn+(upRight - upRight_next)];
+            if (diagThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.UP_RIGHT);
+            }
+        }
+
+        int downRight = scanAdjust(row, column, dir.DOWN_RIGHT, boardstate);
+        newColumn = column+(downRight-row);
+        currentPiece = boardstate[downRight][newColumn];
+        if (diagThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check?");
+            check = true;
+        } else if (currentPiece.getColor() == color) {
+            int downRight_next = scanAdjust(downRight, newColumn, dir.DOWN_RIGHT, boardstate);
+            Piece thisPiece = boardstate[downRight_next][newColumn+(downRight_next-downRight)];
+            if (diagThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.DOWN_RIGHT);
+            }
+        }
+
+        int downLeft = scanAdjust(row, column, dir.DOWN_LEFT, boardstate);
+        newColumn = column-(downLeft-row);
+        currentPiece = boardstate[downLeft][newColumn];
+        if (diagThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check?");
+            check = true;
+        } else if (currentPiece.getColor() == color) {
+            int downLeft_next = scanAdjust(downLeft, newColumn, dir.DOWN_LEFT, boardstate);
+            Piece thisPiece = boardstate[downLeft_next][newColumn-(downLeft_next-downLeft)];
+            if (diagThreats.contains(thisPiece.getType())) {
+                currentPiece.addPin(dir.DOWN_LEFT);
+            }
+        }
+
+        return check;
     }
     /**
      * Adjusts a scan result to match the actual location of the piece

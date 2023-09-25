@@ -239,8 +239,7 @@ public class ChessBoardGUI {
             return;
         }
         // Need two calls here because we need to update Xrays for all pieces
-        board.detectCheckUpdateXray(-1, chessBoardSquares);
-        board.detectCheckUpdateXray(1,chessBoardSquares);
+        board.detectCheckUpdateXray(chessBoardSquares);
 
         if (board.getTurn().equals("w")) {
             currentGamestate = gamestate.WHITE;
