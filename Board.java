@@ -126,24 +126,37 @@ public class Board {
      * Pinned, no legal moves: k7/8/8/8/4b/8/6P1/7K w KQkq - 0 1
      * Not Pinned, extra white blocker: k7/8/8/3b/4P/8/6P1/7K w KQkq - 0 1
      * Not Pinned, extra black blocker: k7/8/8/3b/4p/8/6P1/7K w KQkq - 0 1
+     * Pinned, can push:
+     * Pinned, can capture: k7/8/8/8/8/5b/6P1/7K w KQkq - 0 1
      */
     private HashSet<String> pawnLogic(int originRow, int originColumn, Piece[][] boardstate) {
         HashSet<String> legalMoves = new HashSet<>();
-        // TODO convert this into captureLeft and captureRight
-        Boolean capturing = true;
-        Boolean pushing = true;
+        boolean captureLeft = true;
+        boolean captureRight = true;
+        boolean pushing = true;
         int color = boardstate[originRow][originColumn].getColor();
         int maxRange = pawnScan(originRow, originColumn, boardstate);
         Piece currentPiece = boardstate[originRow][originColumn];
         // Prevent moving out of absolute pins:
         if (currentPiece.getPinned().contains(dir.UP) ||
                 currentPiece.getPinned().contains(dir.DOWN)) {
-            capturing = false;
+            captureLeft = false;
+            captureRight = false;
+        }
+        if (currentPiece.getPinned().contains(dir.LEFT) ||
+                currentPiece.getPinned().contains(dir.RIGHT)) {
+            captureLeft = false;
+            captureRight = false;
+            pushing = false;
         }
         if (currentPiece.getPinned().contains(dir.UP_LEFT) ||
-                currentPiece.getPinned().contains(dir.UP_RIGHT) ||
-                currentPiece.getPinned().contains(dir.DOWN_LEFT) ||
                 currentPiece.getPinned().contains(dir.DOWN_RIGHT)) {
+            captureRight = false;
+            pushing = false;
+        }
+        if (currentPiece.getPinned().contains(dir.UP_RIGHT) ||
+                currentPiece.getPinned().contains(dir.DOWN_LEFT)) {
+            captureLeft = false;
             pushing = false;
         }
 
@@ -154,7 +167,7 @@ public class Board {
                 }
             }
             // Capturing Rules
-            if(capturing) {
+            if(captureLeft) {
                 try {
                     if (boardstate[originRow - 1][originColumn - 1].getColor() == 1 ||
                             passant.contains(positionOfCoord(originRow - 1, originColumn - 1))) {
@@ -162,6 +175,8 @@ public class Board {
                     }
                 } catch (IndexOutOfBoundsException e) {
                 }
+            }
+            if (captureRight) {
                 try {
                     if (boardstate[originRow - 1][originColumn + 1].getColor() == 1 ||
                             passant.contains(positionOfCoord(originRow - 1, originColumn + 1))) {
@@ -178,7 +193,7 @@ public class Board {
                 }
             }
             // Capturing Rules
-            if(capturing) {
+            if(captureRight) {
                 try {
                     if (boardstate[originRow + 1][originColumn - 1].getColor() == -1 ||
                             passant.contains(positionOfCoord(originRow + 1, originColumn - 1))) {
@@ -186,6 +201,8 @@ public class Board {
                     }
                 } catch (IndexOutOfBoundsException e) {
                 }
+            }
+            if (captureLeft) {
                 try {
                     if (boardstate[originRow + 1][originColumn + 1].getColor() == -1 ||
                             passant.contains(positionOfCoord(originRow + 1, originColumn + 1))) {
@@ -195,7 +212,7 @@ public class Board {
                 }
             }
         }
-        System.out.println(capturing + " " + pushing);
+        System.out.println("Left: " + captureLeft + " Right: " + captureRight + " Pushing: " +  pushing);
         return legalMoves;
     }
 
@@ -582,8 +599,10 @@ public class Board {
             diagThreats.add("B");
         }
 
-        Boolean check = false;
+        boolean check = false;
         String king = findKings(color, boardstate);
+        // Two kings must be present for the game to remain active
+        assert king != null;
         int row = coordOfPosition(king)[0];
         int column = coordOfPosition(king)[1];
         int up = scanAdjust(row,column,dir.UP,boardstate);
@@ -619,6 +638,7 @@ public class Board {
         } else if (currentPiece.getColor() == color) {
             int right_next = scanAdjust(row, right, dir.RIGHT, boardstate);
             Piece thisPiece = boardstate[row][right_next];
+
             if (perpThreats.contains(thisPiece.getType())) {
                 currentPiece.addPin(dir.RIGHT);
             }
@@ -633,6 +653,7 @@ public class Board {
             int left_next = scanAdjust(row, left, dir.LEFT, boardstate);
             Piece thisPiece = boardstate[row][left_next];
             if (perpThreats.contains(thisPiece.getType())) {
+                System.out.println("PINNED, LEFT: " + color);
                 currentPiece.addPin(dir.LEFT);
             }
         }
@@ -700,114 +721,168 @@ public class Board {
         return check;
     }
     /**
-     * Adjusts a scan result to match the actual location of the piece
+     * Adjusts a scan result to match the actual location of the piece we're interested in.
      */
     private int scanAdjust(int row, int column, dir direction, Piece[][] boardstate) {
+        // Create a dummy boardstate so that the scan call always originates from a black piece.
+        // Necessary to get consistent outputs from this function.
+        int originalColor = boardstate[row][column].getColor();
+        boardstate[row][column].setColor(1);
+
         int scanResult = 0;
         int adjustmentRow = 0;
         int adjustmentCol = 0;
+        int priorColor;
+
         switch (direction) {
             case UP:
                 scanResult = scanPerpNoBounds(dir.UP, row, column, boardstate);
                 adjustmentRow = 1;
+                // This means we encountered the edge of the board
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[scanResult][column].getColor() == 0) {
-                        return scanResult + adjustmentRow;
-                    }
+                    boardstate[scanResult][column].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentRow;
                 }
+                // This means we encountered a capture
+                priorColor = boardstate[scanResult+1][column].getColor();
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentRow;
+                }
+                // This means we encountered an allied (black) piece
                 break;
             case DOWN:
                 scanResult = scanPerpNoBounds(dir.DOWN, row, column, boardstate);
                 adjustmentRow = -1;
+                // This means we encountered the edge of the board
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[scanResult][column].getColor() == 0) {
-                        return scanResult + adjustmentRow;
-                    }
+                    boardstate[scanResult][column].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentRow;
                 }
+                // This means we encountered a capture
+                priorColor = boardstate[scanResult-1][column].getColor();
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentRow;
+                }
+                // This means we encountered an allied (black) piece
                 break;
             case LEFT:
                 scanResult = scanPerpNoBounds(dir.LEFT, row, column, boardstate);
                 adjustmentCol = 1;
+                // This means we encountered the edge of the board
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[row][scanResult].getColor() == 0) {
-                        return scanResult + adjustmentCol;
-                    }
+                    boardstate[row][scanResult].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentCol;
                 }
+                priorColor = boardstate[row][scanResult+1].getColor();
+                // This means we encountered a capture
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentCol;
+                }
+                // This means we encountered an allied (black) piece
                 break;
             case RIGHT:
                 scanResult = scanPerpNoBounds(dir.RIGHT, row, column, boardstate);
                 adjustmentCol = -1;
+                // This means we encountered the edge of the board
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[row][scanResult].getColor() == 0) {
-                        return scanResult + adjustmentCol;
-                    }
+                    boardstate[row][scanResult].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentCol;
                 }
+                priorColor = boardstate[row][scanResult-1].getColor();
+                // This means we encountered a capture
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentCol;
+                }
+                // This means we encountered an allied (black) piece
                 break;
             case UP_RIGHT:
                 scanResult = scanDiagNoBounds(dir.UP_RIGHT, row, column, boardstate);
                 adjustmentRow = 1;
+                // This means we encountered the edge of the board
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[scanResult][column+(row-scanResult)].getColor() == 0) {
-                        return scanResult + adjustmentRow;
-                    }
+                    boardstate[scanResult][column+(row-scanResult)].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentRow;
                 }
+                priorColor = boardstate[scanResult+1][column+(row-scanResult)-1].getColor();
+                // This means we encountered a capture
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentRow;
+                }
+                // This means we encountered an allied (black) piece
                 break;
             case UP_LEFT:
                 scanResult = scanDiagNoBounds(dir.UP_LEFT, row, column, boardstate);
+                System.out.println(scanResult);
                 adjustmentRow = 1;
-                // If King in top left, scan result will be -1
+                // This means we encountered the edge of the board
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[scanResult][column-(row-scanResult)].getColor() == 0) {
-                        return scanResult + adjustmentRow;
-                    }
+                    boardstate[scanResult][column - (row - scanResult)].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentRow;
                 }
+                priorColor = boardstate[scanResult+1][column - (row - scanResult)+1].getColor();
+                // This means we encountered a capture
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentRow;
+                }
+                // This means we encountered an allied (black) piece
                 break;
             case DOWN_LEFT:
                 scanResult = scanDiagNoBounds(dir.DOWN_LEFT, row, column, boardstate);
                 adjustmentRow = -1;
-                // If King in top left, scan result will be -1
+               // This means we encountered the edge of the board
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[scanResult][column-(scanResult-row)].getColor() == 0) {
-                        return scanResult + adjustmentRow;
-                    }
+                    boardstate[scanResult][column-(scanResult-row)].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentRow;
                 }
+                // This means we encountered a capture
+                priorColor = boardstate[scanResult-1][column-(scanResult-row)+1].getColor();
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentRow;
+                }
+                // This means we encountered an allied (black) piece
                 break;
             case DOWN_RIGHT:
                 scanResult = scanDiagNoBounds(dir.DOWN_RIGHT, row, column, boardstate);
                 adjustmentRow = -1;
-                // If King in top left, scan result will be -1
+                // This means we encountered the edge of the board.
                 try {
-                    // This means the piece we encountered is black
-                    if (boardstate[scanResult][column+(scanResult-row)].getColor() == 0) {
-                        return scanResult + adjustmentRow;
-                    }
+                    boardstate[scanResult][column+(scanResult-row)].getColor();
                 } catch (IndexOutOfBoundsException e) {
+                    boardstate[row][column].setColor(originalColor);
                     return scanResult + adjustmentRow;
                 }
+                // This means we encountered a capture
+                priorColor = boardstate[scanResult-1][column+(scanResult-row)-1].getColor();
+                if (priorColor == -1) {
+                    boardstate[row][column].setColor(originalColor);
+                    return scanResult + adjustmentRow;
+                }
+                // This means we encountered an allied (black) piece
                 break;
         }
 
+        boardstate[row][column].setColor(originalColor);
         return scanResult; // Return original scan if no change made
     }
     /**

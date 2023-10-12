@@ -64,6 +64,11 @@ public class Piece extends JButton {
     }
 
     /**
+     * Sets the color of the piece. Only used to create dummy instances for scanAdjust.
+     */
+    public void setColor(int num) {color = num;}
+
+    /**
      * Returns whether this piece has moved.
      */
     public boolean getHasMoved() {
