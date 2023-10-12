@@ -348,16 +348,16 @@ public class ChessBoardGUI {
         // Detect check, as a side effect updates pin info
 
             if (currentGamestate == gamestate.WHITE_SELECT) {
-                if (board.detectChecks(-1, chessBoardSquares) > 0) {
-//                if (board.detectCheckmate(white)) {
-//                    currentGamestate = gamestate.CHECKMATE;
-//                }
+                if (board.detectChecks(-1, chessBoardSquares)) {
+                    if (board.detectCheckmate(-1,chessBoardSquares)) {
+                        currentGamestate = gamestate.CHECKMATE;
+                    }
                 }
             } else {
-                if (board.detectChecks(1, chessBoardSquares) > 0) {
-//                if (board.detectCheckmate(black)) {
-//                    currentGamestate = gamestate.CHECKMATE;
-//                }
+                if (board.detectChecks(1, chessBoardSquares)) {
+                    if (board.detectCheckmate(1,chessBoardSquares)) {
+                        currentGamestate = gamestate.CHECKMATE;
+                    }
                 }
             }
         }

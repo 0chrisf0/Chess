@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.beans.IndexedPropertyDescriptor;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -103,10 +104,8 @@ public class Board {
         if (piece.equalsIgnoreCase("Q")) {
             legalMoves = queenLogic(originRow, originColumn, boardstate);
         }
-        if (piece.equals("K")) {
-            legalMoves = kingLogic(true);
-        } else if (piece.equals("k")) {
-            legalMoves = kingLogic(false);
+        if (piece.equalsIgnoreCase("K")) {
+            legalMoves = kingLogic(originRow, originColumn, boardstate);
         }
         if (piece.equalsIgnoreCase("B")) {
             legalMoves = bishopLogic(originRow, originColumn, boardstate);
@@ -409,8 +408,50 @@ public class Board {
         rookLegalMoves.addAll(bishopLegalMoves);
         return rookLegalMoves;
     }
-    private HashSet<String> kingLogic(boolean white) {
-        return new HashSet<>();
+
+    /**
+     * Returns the set of legalMoves that the given king can make given the current boardstate.
+     *
+     */
+    private HashSet<String> kingLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        HashSet<String> legalMoves = new HashSet<>();
+        HashSet<Integer[]> spots = new HashSet<>();
+        spots.add(new Integer[]{originRow+1,originColumn});
+        spots.add(new Integer[]{originRow+1,originColumn+1});
+        spots.add(new Integer[]{originRow+1,originColumn-1});
+        spots.add(new Integer[]{originRow-1,originColumn});
+        spots.add(new Integer[]{originRow-1,originColumn+1});
+        spots.add(new Integer[]{originRow-1,originColumn-1});
+        spots.add(new Integer[]{originRow,originColumn+1});
+        spots.add(new Integer[]{originRow,originColumn-1});
+        Piece currentPiece = boardstate[originRow][originColumn];
+        int kingColor = currentPiece.getColor();
+        for (Integer[] spot : spots) {
+            Piece piece;
+            try {
+                piece = boardstate[spot[0]][spot[1]];
+            } catch (IndexOutOfBoundsException e) {
+                continue;
+            }
+            if (piece.getColor() == kingColor) {
+                // TODO this is where I will check for castling
+            } else {
+                // Simulate the position if the king made the given move, then reset to original
+                String originalSpotType = piece.getType();
+                String originalKingType = currentPiece.getType();
+                piece.setType(currentPiece.getType());
+                currentPiece.setType("Empty");
+                currentPiece.setColor(0);
+                if(!detectChecks(kingColor, boardstate)) {
+                    legalMoves.add(positionOfCoord(spot[0],spot[1]));
+                }
+                piece.setType(originalSpotType);
+                currentPiece.setType(originalKingType);
+                currentPiece.setColor(kingColor);
+            }
+        }
+
+        return legalMoves;
     }
 
     /**
@@ -653,9 +694,11 @@ public class Board {
         detectChecks(1,boardstate);
     }
 
-    public int detectChecks (int color, Piece[][] boardstate) {
+    /**
+     * Returns the number of checks on the king of the specified color
+     */
+    public boolean detectChecks (int color, Piece[][] boardstate) {
         // TODO make a helper for this function, the 8 directions are very repetitive
-        // TODO detect horse given checks and pawn given checks
         HashSet<String> perpThreats = new HashSet<>();
         HashSet<String> diagThreats = new HashSet<>();
         if (color == -1) {
@@ -666,7 +709,7 @@ public class Board {
         } else {
             perpThreats.add("R");
             perpThreats.add("Q");
-            diagThreats.add("q");
+            diagThreats.add("Q");
             diagThreats.add("B");
         }
 
@@ -679,7 +722,7 @@ public class Board {
         int up = scanAdjust(row,column,dir.UP,boardstate);
         Piece currentPiece = boardstate[up][column];
         if (perpThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check?"); //TODO is this always true?
+            System.out.println("The King is in Check? UP"); //
             check++;
         } else if (currentPiece.getColor() == color) { // Only allied pieces can be pinned
             int up_next = scanAdjust(up,column, dir.UP, boardstate);
@@ -692,7 +735,7 @@ public class Board {
         int down = scanAdjust(row,column,dir.DOWN,boardstate);
         currentPiece = boardstate[down][column];
         if (perpThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check?");
+            System.out.println("The King is in Check? DOWN");
             check++;
         } else if (currentPiece.getColor() == color) {
             int down_next = scanAdjust(down, column, dir.DOWN, boardstate);
@@ -705,6 +748,7 @@ public class Board {
         int right = scanAdjust(row,column,dir.RIGHT, boardstate);
         currentPiece = boardstate[row][right];
         if (perpThreats.contains(currentPiece.getType())) {
+            System.out.println("The King is in Check? RIGHT");
             check++;
         } else if (currentPiece.getColor() == color) {
             int right_next = scanAdjust(row, right, dir.RIGHT, boardstate);
@@ -718,7 +762,7 @@ public class Board {
         int left = scanAdjust(row,column,dir.LEFT, boardstate);
         currentPiece = boardstate[row][left];
         if (perpThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check?");
+            System.out.println("The King is in Check? LEFT");
             check++;
         } else if (currentPiece.getColor() == color) {
             int left_next = scanAdjust(row, left, dir.LEFT, boardstate);
@@ -734,7 +778,7 @@ public class Board {
         int newColumn = column-(row - upLeft);
         currentPiece = boardstate[upLeft][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check?");
+            System.out.println("The King is in Check? UPLEFT");
             check++;
         } else if (currentPiece.getColor() == color) {
             int upLeft_next = scanAdjust(upLeft, newColumn, dir.UP_LEFT, boardstate);
@@ -749,7 +793,7 @@ public class Board {
         newColumn = column+(row - upRight);
         currentPiece = boardstate[upRight][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check?");
+            System.out.println("The King is in Check? UPRIGHT");
             check++;
         } else if (currentPiece.getColor() == color) {
             int upRight_next = scanAdjust(upRight, newColumn, dir.UP_RIGHT, boardstate);
@@ -763,7 +807,7 @@ public class Board {
         newColumn = column+(downRight-row);
         currentPiece = boardstate[downRight][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check?");
+            System.out.println("The King is in Check? DOWNRIGHT");
             check++;
         } else if (currentPiece.getColor() == color) {
             int downRight_next = scanAdjust(downRight, newColumn, dir.DOWN_RIGHT, boardstate);
@@ -779,7 +823,7 @@ public class Board {
         newColumn = column-(downLeft-row);
         currentPiece = boardstate[downLeft][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check?");
+            System.out.println("The King is in Check? DOWNLEFT");
             check++;
         } else if (currentPiece.getColor() == color) {
             int downLeft_next = scanAdjust(downLeft, newColumn, dir.DOWN_LEFT, boardstate);
@@ -791,7 +835,7 @@ public class Board {
 
         check += knightChecks(color, boardstate, king);
         check += pawnChecks(color,boardstate,king);
-        return check;
+        return check > 0;
     }
 
     /**
@@ -1005,6 +1049,21 @@ public class Board {
             }
         }
         return checks;
+    }
+
+    /**
+     * Determined whether a checkmate has been reached for a given king.
+     */
+    public boolean detectCheckmate(int color, Piece[][] boardstate) {
+        // What needs to happen:
+        // 1. Determine if the king has any legal moves
+        // 2. Determine if there is a way to capture the attacking piece
+        // 3. Determine if there is a way to block the attacking piece
+        // If all three are false, checkmate is achieved
+        String king = findKings(color, boardstate);
+
+
+        return false; // Placeholder
     }
 
     /**

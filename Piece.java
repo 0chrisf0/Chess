@@ -66,8 +66,7 @@ public class Piece extends JButton {
     public void originalBackground() {
         setBackground(background);
     }
-
-    /**
+        /**
      * Returns the color of this piece as an int.
      */
     public int getColor() {
@@ -92,6 +91,14 @@ public class Piece extends JButton {
     public String getType() {
         return type;
     }
+
+    /**
+     * Sets the type of this piece.
+     */
+    public void setType(String given) {
+        type = given;
+    }
+
     public Piece(String type, Boolean moved) {
         super();
         HashMap<String, String> filenames = new HashMap<>();
