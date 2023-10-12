@@ -212,67 +212,106 @@ public class Board {
                 }
             }
         }
-        System.out.println("Left: " + captureLeft + " Right: " + captureRight + " Pushing: " +  pushing);
+        // TODO: (delete?) System.out.println("Left: " + captureLeft + " Right: " + captureRight + " Pushing: " +  pushing);
         return legalMoves;
     }
 
     /**
      * Returns the legalMoves for a rook given the current boardstate.
+     * Test FENs on doc.
      */
     private HashSet<String> rookLogic(int originRow, int originColumn, Piece[][] boardstate) {
-        HashSet<String> legalMoves = new HashSet<>();
+        boolean lateralMoves = true;
+        boolean verticalMoves = true;
+        Piece currentPiece = boardstate[originRow][originColumn];
+        if (currentPiece.getPinned().contains(dir.LEFT) || currentPiece.getPinned().contains(dir.RIGHT) ) {
+            verticalMoves = false;
+        }
+        if (currentPiece.getPinned().contains(dir.DOWN) || currentPiece.getPinned().contains(dir.UP) ) {
+            lateralMoves = false;
+        }
+        if (currentPiece.getPinned().contains(dir.UP_LEFT) ||currentPiece.getPinned().contains(dir.UP_RIGHT)
+                || currentPiece.getPinned().contains(dir.DOWN_LEFT) ||currentPiece.getPinned().contains(dir.DOWN_RIGHT)) {
+            verticalMoves = false;
+            lateralMoves = false;
+        }
+                HashSet<String> legalMoves = new HashSet<>();
         int up = scanPerpNoBounds(dir.UP, originRow, originColumn, boardstate);
         int down = scanPerpNoBounds(dir.DOWN, originRow, originColumn, boardstate);
         int right = scanPerpNoBounds(dir.RIGHT, originRow, originColumn, boardstate);
         int left = scanPerpNoBounds(dir.LEFT, originRow, originColumn, boardstate);
-        // Forwards and backwards moves
-        for (int i = originRow; i < down; i++) {
-            legalMoves.add(positionOfCoord(i, originColumn));
+        if (verticalMoves) {
+            // Up and down moves
+            for (int i = originRow; i < down; i++) {
+                legalMoves.add(positionOfCoord(i, originColumn));
+            }
+            for (int i = originRow; i > up; i--) {
+                legalMoves.add(positionOfCoord(i, originColumn));
+            }
         }
-        for (int i = originRow; i > up; i--) {
-            legalMoves.add(positionOfCoord(i, originColumn));
-        }
-        // Right and left moves
-        for (int i = originColumn; i < right; i++) {
-            legalMoves.add(positionOfCoord(originRow, i));
-        }
-        for (int i = originColumn; i > left; i--) {
-            legalMoves.add(positionOfCoord(originRow, i));
+        if (lateralMoves) {
+            // Right and left moves
+            for (int i = originColumn; i < right; i++) {
+                legalMoves.add(positionOfCoord(originRow, i));
+            }
+            for (int i = originColumn; i > left; i--) {
+                legalMoves.add(positionOfCoord(originRow, i));
+            }
         }
         return legalMoves;
     }
     /**
      * Returns the legalMoves for a given rook given the current boardstate.
+     * Test FENs on doc.
      */
     private HashSet<String> bishopLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        boolean posSlopeDiag = true;
+        boolean negSlopeDiag = true;
+        Piece currentPiece = boardstate[originRow][originColumn];
+        if (currentPiece.getPinned().contains(dir.UP) || currentPiece.getPinned().contains(dir.RIGHT)
+                || currentPiece.getPinned().contains(dir.DOWN) || currentPiece.getPinned().contains(dir.LEFT)) {
+            posSlopeDiag = false;
+            negSlopeDiag = false;
+        }
+        if (currentPiece.getPinned().contains(dir.UP_LEFT) || currentPiece.getPinned().contains(dir.DOWN_RIGHT)) {
+            posSlopeDiag = false;
+        }
+        if (currentPiece.getPinned().contains(dir.UP_RIGHT) || currentPiece.getPinned().contains(dir.DOWN_LEFT)) {
+            negSlopeDiag = false;
+        }
         HashSet<String> legalMoves = new HashSet<>();
         int upleft = scanDiagNoBounds(dir.UP_LEFT,originRow,originColumn,boardstate);
         int upright = scanDiagNoBounds(dir.UP_RIGHT,originRow,originColumn,boardstate);
         int downleft = scanDiagNoBounds(dir.DOWN_LEFT,originRow,originColumn,boardstate);
         int downright = scanDiagNoBounds(dir.DOWN_RIGHT,originRow,originColumn,boardstate);
-        // Up-left diagonal moves
-        int currentCol = originColumn;
-        for (int i = originRow; i > upleft; i--) {
-            legalMoves.add(positionOfCoord(i,currentCol));
-            currentCol--;
+        int currentCol;
+        if (negSlopeDiag) {
+            // Up-left diagonal moves
+            currentCol = originColumn;
+            for (int i = originRow; i > upleft; i--) {
+                legalMoves.add(positionOfCoord(i, currentCol));
+                currentCol--;
+            }
+            // Down-right diagonal moves
+            currentCol = originColumn;
+            for (int i = originRow; i < downright; i++) {
+                legalMoves.add(positionOfCoord(i, currentCol));
+                currentCol++;
+            }
         }
-        // Up-right diagonal moves
-        currentCol = originColumn;
-        for(int i = originRow; i > upright; i--) {
-            legalMoves.add(positionOfCoord(i,currentCol));
-            currentCol++;
-        }
-        // Down-left diagonal moves
-        currentCol = originColumn;
-        for(int i = originRow; i < downleft; i++) {
-            legalMoves.add(positionOfCoord(i,currentCol));
-            currentCol--;
-        }
-        // Down-right diagonal moves
-        currentCol = originColumn;
-        for(int i = originRow; i < downright; i++) {
-            legalMoves.add(positionOfCoord(i,currentCol));
-            currentCol++;
+        if (posSlopeDiag) {
+            // Up-right diagonal moves
+            currentCol = originColumn;
+            for (int i = originRow; i > upright; i--) {
+                legalMoves.add(positionOfCoord(i, currentCol));
+                currentCol++;
+            }
+            // Down-left diagonal moves
+            currentCol = originColumn;
+            for (int i = originRow; i < downleft; i++) {
+                legalMoves.add(positionOfCoord(i, currentCol));
+                currentCol--;
+            }
         }
         return legalMoves;
     }
@@ -285,47 +324,72 @@ public class Board {
     private HashSet<String> knightLogic(int originRow, int originColumn, Piece[][] boardstate) {
         // At most 8 possible moves
         HashSet<String> legalMoves = new HashSet<>();
+        if (!boardstate[originRow][originColumn].getPinned().isEmpty()) {
+            return legalMoves;
+        }
         int currentColor = boardstate[originRow][originColumn].getColor();
-        Piece currentLoc = boardstate[originRow-2][originColumn+1];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow-2,originColumn+1));
+        try {
+            Piece currentLoc = boardstate[originRow - 2][originColumn + 1];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow - 2, originColumn + 1));
+            }
+        } catch (IndexOutOfBoundsException e) {
+
         }
-        currentLoc = boardstate[originRow-2][originColumn-1];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow-2,originColumn-1));
+        try {
+            Piece currentLoc = boardstate[originRow - 2][originColumn - 1];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow - 2, originColumn - 1));
+            }
+        } catch (IndexOutOfBoundsException e) {
+
         }
-        currentLoc = boardstate[originRow-1][originColumn-2];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow-1,originColumn-2));
+        try {
+            Piece currentLoc = boardstate[originRow - 1][originColumn - 2];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow - 1, originColumn - 2));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+
+        try {
+            Piece currentLoc = boardstate[originRow - 1][originColumn + 2];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow - 1, originColumn + 2));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+        try {
+            Piece currentLoc = boardstate[originRow + 1][originColumn - 2];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow + 1, originColumn - 2));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+        try {
+            Piece currentLoc = boardstate[originRow + 1][originColumn + 2];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow + 1, originColumn + 2));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+        try {
+            Piece currentLoc = boardstate[originRow + 2][originColumn - 1];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow + 2, originColumn - 1));
+            }
         }
-        currentLoc = boardstate[originRow-1][originColumn+2];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow-1,originColumn+2));
-        }
-        currentLoc = boardstate[originRow+1][originColumn-2];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow+1,originColumn-2));
-        }
-        currentLoc = boardstate[originRow+1][originColumn+2];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow+1,originColumn+2));
-        }
-        currentLoc = boardstate[originRow+2][originColumn-1];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow+2,originColumn-1));
-        }
-        currentLoc = boardstate[originRow+2][originColumn+1];
-        if (currentLoc.getColor() == 0 ||
-                currentLoc.getColor() == -currentColor) {
-            legalMoves.add(positionOfCoord(originRow+2,originColumn+1));
-        }
+        catch (IndexOutOfBoundsException e) {}
+        try {
+            Piece currentLoc = boardstate[originRow + 2][originColumn + 1];
+            if (currentLoc.getColor() == 0 ||
+                    currentLoc.getColor() == -currentColor) {
+                legalMoves.add(positionOfCoord(originRow + 2, originColumn + 1));
+            }
+        } catch (IndexOutOfBoundsException e) {}
 
 
         return legalMoves;
@@ -336,6 +400,10 @@ public class Board {
      *
      */
     private HashSet<String> queenLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        Piece currentPiece = boardstate[originRow][originColumn];
+        for(dir direction : currentPiece.getPinned()) {
+            System.out.println(direction);
+        }
         HashSet<String> rookLegalMoves = rookLogic(originRow, originColumn, boardstate);
         HashSet<String> bishopLegalMoves = bishopLogic(originRow,originColumn,boardstate);
         rookLegalMoves.addAll(bishopLegalMoves);
@@ -592,10 +660,12 @@ public class Board {
         if (color == -1) {
             perpThreats.add("r");
             perpThreats.add("q");
+            diagThreats.add("q");
             diagThreats.add("b");
         } else {
             perpThreats.add("R");
             perpThreats.add("Q");
+            diagThreats.add("q");
             diagThreats.add("B");
         }
 
@@ -827,7 +897,6 @@ public class Board {
                 break;
             case UP_LEFT:
                 scanResult = scanDiagNoBounds(dir.UP_LEFT, row, column, boardstate);
-                System.out.println(scanResult);
                 adjustmentRow = 1;
                 // This means we encountered the edge of the board
                 try {

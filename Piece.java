@@ -108,6 +108,7 @@ public class Piece extends JButton {
         iconFile = piece.iconFile;
         moved = piece.moved;
         background = getBackground();
+        pinned = piece.pinned;
         setIcon(new ImageIcon(piece.iconFile));
     }
 
