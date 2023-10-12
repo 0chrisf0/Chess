@@ -41,10 +41,21 @@ public class Piece extends JButton {
      */
     private HashSet<Board.dir> pinned = new HashSet<>();
 
+    /**
+     * Adds a pin direction to the set of pin directions
+     */
     public void addPin(Board.dir direction) {
         pinned.add(direction);
     }
 
+    /**
+     * Resets the Piece's pin direction set.
+     */
+    public void resetPin() {pinned = new HashSet<>();}
+
+    /**
+     * Returns the set of pin directions.
+     */
     public HashSet<Board.dir> getPinned() {
         return pinned;
     }

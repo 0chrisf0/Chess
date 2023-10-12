@@ -52,7 +52,8 @@ public class ChessBoardGUI {
         WHITE,
         WHITE_SELECT,
         BLACK,
-        BLACK_SELECT
+        BLACK_SELECT,
+        CHECKMATE
     }
 
 
@@ -239,7 +240,7 @@ public class ChessBoardGUI {
             return;
         }
         // Check if any checks or pins exist
-        board.detectCheckUpdateXray(chessBoardSquares);
+        board.updateXray(chessBoardSquares);
 
         if (board.getTurn().equals("w")) {
             currentGamestate = gamestate.WHITE;
@@ -255,28 +256,18 @@ public class ChessBoardGUI {
     public void buttonPress(int row, int column) {
         System.out.println("On Press: " + currentGamestate);
         switch (currentGamestate) {
-            case WHITE:
+            case WHITE,BLACK:
                 if (chessBoardSquares[row][column].getColor() == -1) {
                     currentGamestate = gamestate.WHITE_SELECT;
-                    currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
-                    // Color current piece and legalMoves
-                    chessBoardSquares[row][column].setBackground(Color.green);
-                    for (String position : currentLegalMoves) {
-                        int[] coords = board.coordOfPosition(position);
-                        chessBoardSquares[coords[0]][coords[1]].setBackground(Color.green);
-                    }
-                }
-                break;
-            case BLACK:
-                if (chessBoardSquares[row][column].getColor() == 1) {
+                } else if (chessBoardSquares[row][column].getColor() == 1) {
                     currentGamestate = gamestate.BLACK_SELECT;
-                    currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
-                    // Color current piece and legalMoves
-                    chessBoardSquares[row][column].setBackground(Color.green);
-                    for (String position : currentLegalMoves) {
-                        int[] coords = board.coordOfPosition(position);
-                        chessBoardSquares[coords[0]][coords[1]].setBackground(Color.green);
-                    }
+                }
+                currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
+                // Color current piece and legalMoves
+                chessBoardSquares[row][column].setBackground(Color.green);
+                for (String position : currentLegalMoves) {
+                    int[] coords = board.coordOfPosition(position);
+                    chessBoardSquares[coords[0]][coords[1]].setBackground(Color.green);
                 }
                 break;
             case WHITE_SELECT, BLACK_SELECT:
@@ -301,15 +292,19 @@ public class ChessBoardGUI {
                     // MAKE MOVE (make a helper function)
 
                     // Uncolor Selection and Check for Checks and update XRAY status
+                    boardUpdate();
                     // TODO make one function that loops over the entire board once and does this
-                    // (will need to loop board to check for pieces that are no longer pinned)
                     uncolor();
-                    if (currentGamestate == gamestate.WHITE_SELECT) {
+                    if (currentGamestate == gamestate.CHECKMATE) {
+                        // END GAME
+                    }
+                    else if (currentGamestate == gamestate.WHITE_SELECT) {
                         currentGamestate = gamestate.BLACK;
                     } else {
                         currentGamestate = gamestate.WHITE;
+
                     }
-                } else { //Illegal move selected, deselect piece
+                } else { // Illegal move selected, deselect piece
                     if (currentGamestate == gamestate.WHITE_SELECT) {
                         currentGamestate = gamestate.WHITE;
                     } else {
@@ -337,4 +332,33 @@ public class ChessBoardGUI {
             }
         }
     }
+
+    /**
+     * Does the various checks that need to be made after each move is made, such as:
+     * -Update each piece's Xray status
+     * -Detect check and checkmate
+     */
+    public void boardUpdate() {
+        // Refresh all pieces' pin status
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                chessBoardSquares[i][j].resetPin();
+            }
+        }
+        // Detect check, as a side effect updates pin info
+
+            if (currentGamestate == gamestate.WHITE_SELECT) {
+                if (board.detectChecks(-1, chessBoardSquares) > 0) {
+//                if (board.detectCheckmate(white)) {
+//                    currentGamestate = gamestate.CHECKMATE;
+//                }
+                }
+            } else {
+                if (board.detectChecks(1, chessBoardSquares) > 0) {
+//                if (board.detectCheckmate(black)) {
+//                    currentGamestate = gamestate.CHECKMATE;
+//                }
+                }
+            }
+        }
 }
