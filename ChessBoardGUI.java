@@ -238,7 +238,7 @@ public class ChessBoardGUI {
         if (board == null) {
             return;
         }
-        // Need two calls here because we need to update Xrays for all pieces
+        // Check if any checks or pins exist
         board.detectCheckUpdateXray(chessBoardSquares);
 
         if (board.getTurn().equals("w")) {
@@ -259,6 +259,8 @@ public class ChessBoardGUI {
                 if (chessBoardSquares[row][column].getColor() == -1) {
                     currentGamestate = gamestate.WHITE_SELECT;
                     currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
+                    // Color current piece and legalMoves
+                    chessBoardSquares[row][column].setBackground(Color.green);
                     for (String position : currentLegalMoves) {
                         int[] coords = board.coordOfPosition(position);
                         chessBoardSquares[coords[0]][coords[1]].setBackground(Color.green);
@@ -269,6 +271,8 @@ public class ChessBoardGUI {
                 if (chessBoardSquares[row][column].getColor() == 1) {
                     currentGamestate = gamestate.BLACK_SELECT;
                     currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
+                    // Color current piece and legalMoves
+                    chessBoardSquares[row][column].setBackground(Color.green);
                     for (String position : currentLegalMoves) {
                         int[] coords = board.coordOfPosition(position);
                         chessBoardSquares[coords[0]][coords[1]].setBackground(Color.green);
@@ -294,7 +298,7 @@ public class ChessBoardGUI {
                 // 4. If there is a check, should automatically check for checkmate as well.
                 if (currentLegalMoves.contains(board.positionOfCoord(row, column))) {
 
-                    // MAKE MOVE
+                    // MAKE MOVE (make a helper function)
 
                     // Uncolor Selection and Check for Checks and update XRAY status
                     // TODO make one function that loops over the entire board once and does this

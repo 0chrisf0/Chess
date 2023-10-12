@@ -45,6 +45,9 @@ public class Piece extends JButton {
         pinned.add(direction);
     }
 
+    public HashSet<Board.dir> getPinned() {
+        return pinned;
+    }
     /**
      * Sets the background color to the original one
      * @return

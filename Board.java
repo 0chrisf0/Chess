@@ -121,50 +121,81 @@ public class Board {
 
     /**
      * Returns the legalMoves for a given pawn given the current boardstate.
+     * FEN TESTS:
+     *
+     * Pinned, no legal moves: k7/8/8/8/4b/8/6P1/7K w KQkq - 0 1
+     * Not Pinned, extra white blocker: k7/8/8/3b/4P/8/6P1/7K w KQkq - 0 1
+     * Not Pinned, extra black blocker: k7/8/8/3b/4p/8/6P1/7K w KQkq - 0 1
      */
     private HashSet<String> pawnLogic(int originRow, int originColumn, Piece[][] boardstate) {
         HashSet<String> legalMoves = new HashSet<>();
+        // TODO convert this into captureLeft and captureRight
+        Boolean capturing = true;
+        Boolean pushing = true;
         int color = boardstate[originRow][originColumn].getColor();
         int maxRange = pawnScan(originRow, originColumn, boardstate);
+        Piece currentPiece = boardstate[originRow][originColumn];
+        // Prevent moving out of absolute pins:
+        if (currentPiece.getPinned().contains(dir.UP) ||
+                currentPiece.getPinned().contains(dir.DOWN)) {
+            capturing = false;
+        }
+        if (currentPiece.getPinned().contains(dir.UP_LEFT) ||
+                currentPiece.getPinned().contains(dir.UP_RIGHT) ||
+                currentPiece.getPinned().contains(dir.DOWN_LEFT) ||
+                currentPiece.getPinned().contains(dir.DOWN_RIGHT)) {
+            pushing = false;
+        }
+
         if (color == -1) { // White Piece
-            for (int i = originRow; i > maxRange; i--) {
-                legalMoves.add(positionOfCoord(i,originColumn));
-            }
-            try {
-                if (boardstate[originRow-1][originColumn-1].getColor() == 1 ||
-                        passant.contains(positionOfCoord(originRow-1,originColumn-1)) ) {
-                    legalMoves.add(positionOfCoord(originRow - 1, originColumn - 1));
+            if(pushing) {
+                for (int i = originRow; i > maxRange; i--) {
+                    legalMoves.add(positionOfCoord(i, originColumn));
                 }
-            } catch (IndexOutOfBoundsException e) {
             }
-            try {
-                if (boardstate[originRow-1][originColumn+1].getColor() == 1 ||
-                        passant.contains(positionOfCoord(originRow-1,originColumn+1))) {
-                    legalMoves.add(positionOfCoord(originRow - 1, originColumn + 1));
+            // Capturing Rules
+            if(capturing) {
+                try {
+                    if (boardstate[originRow - 1][originColumn - 1].getColor() == 1 ||
+                            passant.contains(positionOfCoord(originRow - 1, originColumn - 1))) {
+                        legalMoves.add(positionOfCoord(originRow - 1, originColumn - 1));
+                    }
+                } catch (IndexOutOfBoundsException e) {
                 }
-            } catch (IndexOutOfBoundsException e) {
+                try {
+                    if (boardstate[originRow - 1][originColumn + 1].getColor() == 1 ||
+                            passant.contains(positionOfCoord(originRow - 1, originColumn + 1))) {
+                        legalMoves.add(positionOfCoord(originRow - 1, originColumn + 1));
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                }
             }
 
-        } else {
-            for (int i = originRow; i < maxRange; i++) {
-                legalMoves.add(positionOfCoord(i,originColumn));
-            }
-            try {
-                if (boardstate[originRow+1][originColumn-1].getColor() == -1 ||
-                        passant.contains(positionOfCoord(originRow+1,originColumn-1))) {
-                    legalMoves.add(positionOfCoord(originRow + 1, originColumn - 1));
+        } else { // Black piece
+            if(pushing) {
+                for (int i = originRow; i < maxRange; i++) {
+                    legalMoves.add(positionOfCoord(i, originColumn));
                 }
-            } catch (IndexOutOfBoundsException e) {
             }
-            try {
-                if (boardstate[originRow+1][originColumn+1].getColor() == -1 ||
-                        passant.contains(positionOfCoord(originRow+1,originColumn+1))) {
-                    legalMoves.add(positionOfCoord(originRow + 1, originColumn + 1));
+            // Capturing Rules
+            if(capturing) {
+                try {
+                    if (boardstate[originRow + 1][originColumn - 1].getColor() == -1 ||
+                            passant.contains(positionOfCoord(originRow + 1, originColumn - 1))) {
+                        legalMoves.add(positionOfCoord(originRow + 1, originColumn - 1));
+                    }
+                } catch (IndexOutOfBoundsException e) {
                 }
-            } catch (IndexOutOfBoundsException e) {
+                try {
+                    if (boardstate[originRow + 1][originColumn + 1].getColor() == -1 ||
+                            passant.contains(positionOfCoord(originRow + 1, originColumn + 1))) {
+                        legalMoves.add(positionOfCoord(originRow + 1, originColumn + 1));
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                }
             }
         }
-        // TODO add en passant
+        System.out.println(capturing + " " + pushing);
         return legalMoves;
     }
 
@@ -533,11 +564,12 @@ public class Board {
      * DOWNLEFT: k/8/8/4K/8/2P/8/b w KQkq - 0 1
      */
     public Boolean detectCheckUpdateXray(Piece[][] boardstate) {
-        // TODO make a helper for this function
         return detectCheckHelper(-1,boardstate) || detectCheckHelper(1,boardstate);
     }
 
     private Boolean detectCheckHelper (int color, Piece[][] boardstate) {
+        // TODO make a helper for this function, the 8 directions are very repetitive
+        // TODO detect horse given checks and pawn given checks
         HashSet<String> perpThreats = new HashSet<>();
         HashSet<String> diagThreats = new HashSet<>();
         if (color == -1) {
@@ -604,7 +636,7 @@ public class Board {
                 currentPiece.addPin(dir.LEFT);
             }
         }
-        // For diagonals, finding which column value to plug in to get the piece will likely
+        // For diagonals, finding which column value to plug in to get the piece will
         // be a difference of scanResult and king row position
         int upLeft = scanAdjust(row, column, dir.UP_LEFT, boardstate);
         int newColumn = column-(row - upLeft);
@@ -616,6 +648,7 @@ public class Board {
             int upLeft_next = scanAdjust(upLeft, newColumn, dir.UP_LEFT, boardstate);
             Piece thisPiece = boardstate[upLeft_next][newColumn-(upLeft - upLeft_next)];
             if (diagThreats.contains(thisPiece.getType())) {
+                System.out.println("Pinner: " + upLeft_next + (newColumn-(upLeft - upLeft_next)));
                 currentPiece.addPin(dir.UP_LEFT);
             }
         }
@@ -644,6 +677,8 @@ public class Board {
             int downRight_next = scanAdjust(downRight, newColumn, dir.DOWN_RIGHT, boardstate);
             Piece thisPiece = boardstate[downRight_next][newColumn+(downRight_next-downRight)];
             if (diagThreats.contains(thisPiece.getType())) {
+                System.out.println(thisPiece.getType());
+                System.out.println("PIN DOWNRIGHT");
                 currentPiece.addPin(dir.DOWN_RIGHT);
             }
         }
