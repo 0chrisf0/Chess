@@ -334,14 +334,58 @@ public class ChessBoardGUI {
         Piece target = chessBoardSquares[destRow][destCol];
 
         if(target.getColor() != 0) {
-            // Do something regarding captures? E.g. listing the captured pieces on the gui somewhere?
+            // TODO: Do something regarding captures? E.g. listing the captured pieces on the gui somewhere?
         }
         if(origin.getType().equalsIgnoreCase("P")) {
             // Special things need to be done for pawns:
-            // E.g. Promotion
-            
+            // Promotion:
+            if (currentGamestate == gamestate.WHITE_SELECT && destRow == 0) {
+                ImageIcon[] options = {new ImageIcon("icons/whitequeen.png"),
+                        new ImageIcon("icons/whiterook.png"),
+                        new ImageIcon("icons/whitebishop.png"),
+                        new ImageIcon("icons/whiteknight.png")};
+                int selectedOption = JOptionPane.showOptionDialog(
+                        gui,
+                        "Promotion",
+                        "Choose a piece to promote to:",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                switch (selectedOption) {
+                    case 0 -> origin.reinitialize(new Piece("Q", true));
+                    case 1 -> origin.reinitialize(new Piece("R", true));
+                    case 2 -> origin.reinitialize(new Piece("B", true));
+                    case 3 -> origin.reinitialize(new Piece("N", true));
+                }
+            } else if (currentGamestate == gamestate.BLACK_SELECT && destRow == 7) {
+                ImageIcon[] options = {new ImageIcon("icons/blackqueen.png"),
+                        new ImageIcon("icons/blackrook.png"),
+                        new ImageIcon("icons/blackbishop.png"),
+                        new ImageIcon("icons/blackknight.png")};
+                int selectedOption = JOptionPane.showOptionDialog(
+                        gui,
+                        "Promotion",
+                        "Choose a piece to promote to:",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                switch (selectedOption) {
+                    case 0 -> origin.reinitialize(new Piece("q", true));
+                    case 1 -> origin.reinitialize(new Piece("r", true));
+                    case 2 -> origin.reinitialize(new Piece("b", true));
+                    case 3 -> origin.reinitialize(new Piece("n", true));
+                }
+
+            }
             target.reinitialize(origin); // Is this all I need to do?
             target.setMoved(true);
+            // This maintains the background because I am just setting the background to what it already is
             origin.reinitialize(empty);
             return;
         }

@@ -466,11 +466,9 @@ public class Board {
     }
 
     /**
-     * Returns the set of legalMoves that the given king can make given the current boardstate.
-     *
+     * Neighboring squares generator.
      */
-    private HashSet<String> kingLogic(int originRow, int originColumn, Piece[][] boardstate) {
-        HashSet<String> legalMoves = new HashSet<>();
+    private HashSet<Integer[]> spotGenerator(int originRow, int originColumn) {
         HashSet<Integer[]> spots = new HashSet<>();
         spots.add(new Integer[]{originRow+1,originColumn});
         spots.add(new Integer[]{originRow+1,originColumn+1});
@@ -480,6 +478,15 @@ public class Board {
         spots.add(new Integer[]{originRow-1,originColumn-1});
         spots.add(new Integer[]{originRow,originColumn+1});
         spots.add(new Integer[]{originRow,originColumn-1});
+        return spots;
+    }
+    /**
+     * Returns the set of legalMoves that the given king can make given the current boardstate.
+     *
+     */
+    private HashSet<String> kingLogic(int originRow, int originColumn, Piece[][] boardstate) {
+        HashSet<String> legalMoves = new HashSet<>();
+        HashSet<Integer[]> spots = spotGenerator(originRow, originColumn);
         Piece currentPiece = boardstate[originRow][originColumn];
         int kingColor = currentPiece.getColor();
         for (Integer[] spot : spots) {
@@ -492,6 +499,21 @@ public class Board {
             if (piece.getColor() == kingColor) {
                 // TODO this is where I will check for castling
             } else {
+                // Check if this spot neighbors the opposing king
+                boolean neighborKing = false;
+                HashSet<Integer[]> neighborSpots = spotGenerator(spot[0],spot[1]);
+                for (Integer[] neighborSpot : neighborSpots) {
+                    try {
+                        piece = boardstate[neighborSpot[0]][neighborSpot[1]];
+                    } catch (IndexOutOfBoundsException e) {
+                        continue;
+                    }
+                    if (boardstate[neighborSpot[0]][neighborSpot[1]].getType().equalsIgnoreCase("K")
+                            && boardstate[neighborSpot[0]][neighborSpot[1]].getColor() != kingColor) {
+                        neighborKing = true;
+                    }
+                }
+
                 // Simulate the position if the king made the given move, then reset to original
                 String originalSpotType = piece.getType();
                 int originalSpotColor = piece.getColor();
@@ -500,7 +522,7 @@ public class Board {
                 piece.setColor(currentPiece.getColor());
                 currentPiece.setType("Empty");
                 currentPiece.setColor(0);
-                if(detectChecks(kingColor, boardstate) == 0) {
+                if(detectChecks(kingColor, boardstate) == 0 && !neighborKing) {
                     legalMoves.add(positionOfCoord(spot[0],spot[1]));
                 }
                 piece.setType(originalSpotType);
@@ -775,7 +797,6 @@ public class Board {
         int check = 0;
         String king = findKings(color, boardstate);
         // Two kings must be present for the game to remain active
-        assert king != null;
         int row = coordOfPosition(king)[0];
         int column = coordOfPosition(king)[1];
         int up = scanAdjust(row,column,dir.UP,boardstate);
@@ -1065,6 +1086,7 @@ public class Board {
         boardstate[row][column].setColor(originalColor);
         return scanResult; // Return original scan if no change made
     }
+
 
     /**
      * Returns the current number of pawn given checks.
