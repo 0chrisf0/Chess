@@ -102,7 +102,9 @@ public class Board {
             System.out.println(e);
         }
         HashSet<String> legalMoves = new HashSet<>();
-        String piece = boardstate[originRow][originColumn].getType();
+        Piece currentPiece = boardstate[originRow][originColumn];
+        String piece = currentPiece.getType();
+        int color = currentPiece.getColor();
         if (piece.equalsIgnoreCase("P")) {
             legalMoves = pawnLogic(originRow, originColumn, boardstate);
         }
@@ -122,8 +124,54 @@ public class Board {
             legalMoves = knightLogic(originRow, originColumn, boardstate);
         }
 
-       // TODO check for check in ChessBoardGUI (call a function in Board from ChessBoardGUI
+       if (detectChecks(color, boardstate) > 0) {
+           removeIllegalMoves(currentPiece, color, legalMoves, boardstate);
+       }
         return legalMoves;
+    }
+
+    /**
+     * Called when the king is in check to remove the moves that do not remove the king from check.
+     */
+    private void removeIllegalMoves(Piece currentPiece, int color, HashSet<String> currentMoves,
+            Piece[][] boardstate) {
+        // Need to make a copy so we can remove things while iterating without errors.
+        HashSet<String> iterationSet= new HashSet<>(currentMoves);
+        for (String move : iterationSet) {
+            if (simulateCheckTest(currentPiece, color, move, boardstate)) {
+                currentMoves.remove(move);
+            }
+        }
+    }
+
+    /**
+     * Simulates the given move and returns a boolean representing whether that move results in
+     * the king STILL BEING IN CHECK (true).
+     */
+    private boolean simulateCheckTest(Piece currentPiece, int color, String currentMove, Piece[][] boardstate) {
+        boolean condition = false;
+        int[] currentMoveCoords = coordOfPosition(currentMove);
+        Piece target = boardstate[currentMoveCoords[0]][currentMoveCoords[1]];
+        // Store original info so we can revert simulation
+        String originalTargetType = target.getType();
+        int originalTargetColor = target.getColor();
+        String originalPieceType = currentPiece.getType();
+        int originalPieceColor = currentPiece.getColor();
+        // Simulate
+        target.setType(originalPieceType);
+        target.setColor(originalPieceColor);
+        currentPiece.setType("Empty");
+        currentPiece.setColor(0);
+        if(detectChecks(color, boardstate) > 0) {
+            condition = true;
+        }
+        // Revert simulation
+        target.setType(originalTargetType);
+        target.setColor(originalTargetColor);
+        currentPiece.setType(originalPieceType);
+        currentPiece.setColor(originalPieceColor);
+        return condition;
+
     }
 
     /**

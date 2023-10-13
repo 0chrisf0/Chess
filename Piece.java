@@ -36,6 +36,7 @@ public class Piece extends JButton {
      */
     private Color background;
 
+
     /**
      * The direction the piece is pinned against. If the set is empty, there
      */
@@ -93,6 +94,12 @@ public class Piece extends JButton {
     }
 
     /**
+     * Sets the moved status of this piece.
+     */
+    public void setMoved(boolean val) {
+        moved = val;
+    }
+    /**
      * Sets the type of this piece.
      */
     public void setType(String given) {
@@ -100,6 +107,7 @@ public class Piece extends JButton {
     }
 
     public Piece(String type, Boolean moved) {
+        // TODO what is super actually doing here?
         super();
         HashMap<String, String> filenames = new HashMap<>();
         filenames.put("k", "king");

@@ -16,6 +16,7 @@ public class ChessBoardGUI {
      * chessBoardSquares is a 2D array representing all the squares of the chessboard.
      */
     private Piece[][] chessBoardSquares = new Piece[8][8];
+
     /**
      * brownColor is the RGB value corresponding to the color of the brown chessboard squares.
      */
@@ -290,13 +291,12 @@ public class ChessBoardGUI {
                 // 3. Check for promotion, then check for checks on the opposing King
                 // 4. If there is a check, should automatically check for checkmate as well.
                 if (currentLegalMoves.contains(board.positionOfCoord(row, column))) {
-
+                    // Uncolor selection first so background can be used in makeMove()
+                    uncolor();
                     // MAKE MOVE (make a helper function)
-
+                    makeMove(row, column);
                     // Uncolor Selection and Check for Checks and update XRAY status
                     boardUpdate();
-                    // TODO make one function that loops over the entire board once and does this
-                    uncolor();
                     if (currentGamestate == gamestate.CHECKMATE) {
                         // END GAME
                     }
@@ -325,6 +325,40 @@ public class ChessBoardGUI {
     }
 
     /**
+     * Handles the execution of making a move on the board. Makes sure to update all necessary
+     * fields. related to the backing data and the display on the GUI.
+     */
+    private void makeMove(int destRow, int destCol) {
+        Piece empty = new Piece("Empty",false);
+        Piece origin = chessBoardSquares[lastclick[0]][lastclick[1]];
+        Piece target = chessBoardSquares[destRow][destCol];
+
+        if(target.getColor() != 0) {
+            // Do something regarding captures? E.g. listing the captured pieces on the gui somewhere?
+        }
+        if(origin.getType().equalsIgnoreCase("P")) {
+            // Special things need to be done for pawns:
+            // E.g. Promotion
+            
+            target.reinitialize(origin); // Is this all I need to do?
+            target.setMoved(true);
+            origin.reinitialize(empty);
+            return;
+        }
+        if(origin.getType().equalsIgnoreCase("K")) {
+            // Special things to consider for kings:
+            // E.g. Castling
+            target.reinitialize(origin); // Is this all I need to do?
+            target.setMoved(true);
+            origin.reinitialize(empty);
+            return;
+        }
+        target.reinitialize(origin); // Is this all I need to do?
+        target.setMoved(true);
+        origin.reinitialize(empty);
+
+    }
+    /**
      * Sets all the squares on the chessboard Piece's backgrounds to what they were originally.
      */
     public void uncolor() {
@@ -348,18 +382,21 @@ public class ChessBoardGUI {
             }
         }
         // Detect check
-            if (currentGamestate == gamestate.WHITE_SELECT) {
-                if (board.detectChecks(-1, chessBoardSquares) > 0) {
-                    if (board.detectCheckmate(-1,chessBoardSquares)) {
-                        currentGamestate = gamestate.CHECKMATE;
-                    }
-                }
-            } else {
-                if (board.detectChecks(1, chessBoardSquares) > 0) {
-                    if (board.detectCheckmate(1,chessBoardSquares)) {
-                        currentGamestate = gamestate.CHECKMATE;
-                    }
+        if (currentGamestate == gamestate.WHITE_SELECT) {
+            if (board.detectChecks(1, chessBoardSquares) > 0) {
+                if (board.detectCheckmate(1, chessBoardSquares)) {
+                    currentGamestate = gamestate.CHECKMATE;
                 }
             }
+        } else {
+            if (board.detectChecks(-1, chessBoardSquares) > 0) {
+
+                if (board.detectCheckmate(-1, chessBoardSquares)) {
+                    currentGamestate = gamestate.CHECKMATE;
+                }
+            }
+
         }
+
+    }
 }
