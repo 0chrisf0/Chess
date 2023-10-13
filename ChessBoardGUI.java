@@ -257,9 +257,9 @@ public class ChessBoardGUI {
         System.out.println("On Press: " + currentGamestate);
         switch (currentGamestate) {
             case WHITE,BLACK:
-                if (chessBoardSquares[row][column].getColor() == -1) {
+                if (currentGamestate == gamestate.WHITE && chessBoardSquares[row][column].getColor() == -1) {
                     currentGamestate = gamestate.WHITE_SELECT;
-                } else if (chessBoardSquares[row][column].getColor() == 1) {
+                } else if (currentGamestate == gamestate.BLACK && chessBoardSquares[row][column].getColor() == 1) {
                     currentGamestate = gamestate.BLACK_SELECT;
                 }
                 currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
@@ -345,16 +345,15 @@ public class ChessBoardGUI {
                 chessBoardSquares[i][j].resetPin();
             }
         }
-        // Detect check, as a side effect updates pin info
-
+        // Detect check
             if (currentGamestate == gamestate.WHITE_SELECT) {
-                if (board.detectChecks(-1, chessBoardSquares)) {
+                if (board.detectChecks(-1, chessBoardSquares) > 0) {
                     if (board.detectCheckmate(-1,chessBoardSquares)) {
                         currentGamestate = gamestate.CHECKMATE;
                     }
                 }
             } else {
-                if (board.detectChecks(1, chessBoardSquares)) {
+                if (board.detectChecks(1, chessBoardSquares) > 0) {
                     if (board.detectCheckmate(1,chessBoardSquares)) {
                         currentGamestate = gamestate.CHECKMATE;
                     }

@@ -50,6 +50,13 @@ public class Board {
     }
 
     /**
+     * The location of the last piece detected to be currently attacking a king.
+     */
+    private String attackerPos = "";
+
+    private dir attackerDir;
+
+    /**
      * Returns whose turn it is
      */
     public String getTurn() {
@@ -438,14 +445,17 @@ public class Board {
             } else {
                 // Simulate the position if the king made the given move, then reset to original
                 String originalSpotType = piece.getType();
+                int originalSpotColor = piece.getColor();
                 String originalKingType = currentPiece.getType();
                 piece.setType(currentPiece.getType());
+                piece.setColor(currentPiece.getColor());
                 currentPiece.setType("Empty");
                 currentPiece.setColor(0);
-                if(!detectChecks(kingColor, boardstate)) {
+                if(detectChecks(kingColor, boardstate) == 0) {
                     legalMoves.add(positionOfCoord(spot[0],spot[1]));
                 }
                 piece.setType(originalSpotType);
+                piece.setColor(originalSpotColor);
                 currentPiece.setType(originalKingType);
                 currentPiece.setColor(kingColor);
             }
@@ -697,7 +707,7 @@ public class Board {
     /**
      * Returns the number of checks on the king of the specified color
      */
-    public boolean detectChecks (int color, Piece[][] boardstate) {
+    public int detectChecks (int color, Piece[][] boardstate) {
         // TODO make a helper for this function, the 8 directions are very repetitive
         HashSet<String> perpThreats = new HashSet<>();
         HashSet<String> diagThreats = new HashSet<>();
@@ -722,7 +732,8 @@ public class Board {
         int up = scanAdjust(row,column,dir.UP,boardstate);
         Piece currentPiece = boardstate[up][column];
         if (perpThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? UP"); //
+            attackerPos = positionOfCoord(up,column);
+            attackerDir = dir.UP;
             check++;
         } else if (currentPiece.getColor() == color) { // Only allied pieces can be pinned
             int up_next = scanAdjust(up,column, dir.UP, boardstate);
@@ -735,7 +746,8 @@ public class Board {
         int down = scanAdjust(row,column,dir.DOWN,boardstate);
         currentPiece = boardstate[down][column];
         if (perpThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? DOWN");
+            attackerPos = positionOfCoord(down,column);
+            attackerDir = dir.DOWN;
             check++;
         } else if (currentPiece.getColor() == color) {
             int down_next = scanAdjust(down, column, dir.DOWN, boardstate);
@@ -748,7 +760,8 @@ public class Board {
         int right = scanAdjust(row,column,dir.RIGHT, boardstate);
         currentPiece = boardstate[row][right];
         if (perpThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? RIGHT");
+            attackerPos = positionOfCoord(row,right);
+            attackerDir = dir.RIGHT;
             check++;
         } else if (currentPiece.getColor() == color) {
             int right_next = scanAdjust(row, right, dir.RIGHT, boardstate);
@@ -762,13 +775,13 @@ public class Board {
         int left = scanAdjust(row,column,dir.LEFT, boardstate);
         currentPiece = boardstate[row][left];
         if (perpThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? LEFT");
+            attackerPos = positionOfCoord(row,left);
+            attackerDir = dir.LEFT;
             check++;
         } else if (currentPiece.getColor() == color) {
             int left_next = scanAdjust(row, left, dir.LEFT, boardstate);
             Piece thisPiece = boardstate[row][left_next];
             if (perpThreats.contains(thisPiece.getType())) {
-                System.out.println("PINNED, LEFT: " + color);
                 currentPiece.addPin(dir.LEFT);
             }
         }
@@ -778,13 +791,13 @@ public class Board {
         int newColumn = column-(row - upLeft);
         currentPiece = boardstate[upLeft][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? UPLEFT");
+            attackerPos = positionOfCoord(upLeft,newColumn);
+            attackerDir = dir.UP_LEFT;
             check++;
         } else if (currentPiece.getColor() == color) {
             int upLeft_next = scanAdjust(upLeft, newColumn, dir.UP_LEFT, boardstate);
             Piece thisPiece = boardstate[upLeft_next][newColumn-(upLeft - upLeft_next)];
             if (diagThreats.contains(thisPiece.getType())) {
-                System.out.println("Pinner: " + upLeft_next + (newColumn-(upLeft - upLeft_next)));
                 currentPiece.addPin(dir.UP_LEFT);
             }
         }
@@ -793,7 +806,8 @@ public class Board {
         newColumn = column+(row - upRight);
         currentPiece = boardstate[upRight][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? UPRIGHT");
+            attackerPos = positionOfCoord(upRight,newColumn);
+            attackerDir = dir.UP_RIGHT;
             check++;
         } else if (currentPiece.getColor() == color) {
             int upRight_next = scanAdjust(upRight, newColumn, dir.UP_RIGHT, boardstate);
@@ -807,14 +821,13 @@ public class Board {
         newColumn = column+(downRight-row);
         currentPiece = boardstate[downRight][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? DOWNRIGHT");
+            attackerPos = positionOfCoord(downRight,newColumn);
+            attackerDir = dir.DOWN_RIGHT;
             check++;
         } else if (currentPiece.getColor() == color) {
             int downRight_next = scanAdjust(downRight, newColumn, dir.DOWN_RIGHT, boardstate);
             Piece thisPiece = boardstate[downRight_next][newColumn+(downRight_next-downRight)];
             if (diagThreats.contains(thisPiece.getType())) {
-                System.out.println(thisPiece.getType());
-                System.out.println("PIN DOWNRIGHT");
                 currentPiece.addPin(dir.DOWN_RIGHT);
             }
         }
@@ -823,7 +836,8 @@ public class Board {
         newColumn = column-(downLeft-row);
         currentPiece = boardstate[downLeft][newColumn];
         if (diagThreats.contains(currentPiece.getType())) {
-            System.out.println("The King is in Check? DOWNLEFT");
+            attackerPos = positionOfCoord(downLeft,newColumn);
+            attackerDir = dir.DOWN_LEFT;
             check++;
         } else if (currentPiece.getColor() == color) {
             int downLeft_next = scanAdjust(downLeft, newColumn, dir.DOWN_LEFT, boardstate);
@@ -835,7 +849,7 @@ public class Board {
 
         check += knightChecks(color, boardstate, king);
         check += pawnChecks(color,boardstate,king);
-        return check > 0;
+        return check;
     }
 
     /**
@@ -1055,17 +1069,188 @@ public class Board {
      * Determined whether a checkmate has been reached for a given king.
      */
     public boolean detectCheckmate(int color, Piece[][] boardstate) {
-        // What needs to happen:
-        // 1. Determine if the king has any legal moves
-        // 2. Determine if there is a way to capture the attacking piece
-        // 3. Determine if there is a way to block the attacking piece
-        // If all three are false, checkmate is achieved
+        // What needs to happen for checkmate
+        // 1. The king has no legal moves.
+        boolean legalMoves = false;
+        // 2. There is no way to capture the attacking piece.
+        // 3. There is no way to block the attacking piece.
+        // If all three are true, checkmate is achieved
         String king = findKings(color, boardstate);
+        int[] kingCoords = coordOfPosition(king);
+        // Condition 1:
+        legalMoves = kingLogic(kingCoords[0],kingCoords[1],boardstate).isEmpty();
+        // Conditions 2 & 3:
+        // This detectChecks call is necessary to update incase kingLogic altered the fields
+        if (detectChecks(color, boardstate) > 1) {
+            // TODO is this actually true? (if there is a double check we cannot block or capture)
+            return legalMoves && true;
+        }
+        if (legalMoves && canCaptureOrBlock(color, boardstate, kingCoords, king)) { //TODO delete
+            System.out.println("CHECKMATE");
+        }
+        return legalMoves && canCaptureOrBlock(color, boardstate, kingCoords, king);
 
-
-        return false; // Placeholder
     }
 
+    public boolean canCaptureOrBlock(int color, Piece[][] boardstate, int[] kingCoords, String kingPos) {
+
+        int[] attackerCoords = coordOfPosition(attackerPos);
+        Piece attacker = boardstate[attackerCoords[0]][attackerCoords[1]];
+        System.out.println(attackerPos);
+        // Knights and pawns cannot be blocked.
+        if (attacker.getType().equalsIgnoreCase("N") || attacker.getType().equalsIgnoreCase("P")) {
+            for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
+                    if(legalMoves(row, col, boardstate).contains(attackerPos)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        // Rooks, bishops, and queens can be blocked
+        int currentCol;
+        int originColumn = kingCoords[1];
+        int originRow = kingCoords[0];
+        // Up-left diagonal moves
+        if (attackerDir == dir.UP_LEFT) {
+            currentCol = originColumn;
+            for (int i = originRow; i > attackerCoords[0]-1; i--) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        // The king himself cannot block... This line is okay because if it can
+                        // capture, that will be handled in kingLogic
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        // Want to find allied piece that can block/capture
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+                currentCol--;
+            }
+        }
+        // Down-right diagonal moves
+        if(attackerDir == dir.DOWN_RIGHT) {
+            currentCol = originColumn;
+            for (int i = originRow; i < attackerCoords[0]+1; i++) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+                currentCol++;
+            }
+        }
+        // Up-right diagonal moves
+        if(attackerDir == dir.UP_RIGHT) {
+            currentCol = originColumn;
+            for (int i = originRow; i > attackerCoords[0]-1; i--) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+                currentCol++;
+            }
+        }
+        // Down-left diagonal moves
+        if (attackerDir == dir.DOWN_LEFT) {
+            currentCol = originColumn;
+            for (int i = originRow; i < attackerCoords[0]+1; i++) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+                currentCol--;
+            }
+        }
+
+        // Up and down moves
+        if (attackerDir == dir.DOWN) {
+            for (int i = originRow; i < attackerCoords[0] + 1; i++) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        if (attackerDir == dir.UP) {
+            for (int i = originRow; i > attackerCoords[0] - 1; i--) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        // Right and left moves
+        if (attackerDir == dir.RIGHT) {
+            for (int i = originColumn; i < attackerCoords[1] + 1; i++) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        if (attackerDir == dir.LEFT) {
+            for (int i = originColumn; i > attackerCoords[1] - 1; i--) {
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        if (positionOfCoord(row,col).equals(kingPos)) {
+                            continue;
+                        }
+                        if (boardstate[row][col].getColor() == color &&
+                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
     /**
      * Converts a row and column to a String position.
      */
