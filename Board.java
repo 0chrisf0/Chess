@@ -97,6 +97,7 @@ public class Board {
      * This will make additional features in the future easier.
      */
     public HashSet<String> legalMoves(int originRow, int originColumn, Piece[][] boardstate) {
+        // TODO delete this after implementing en passant
         for(String e : passant) {
             System.out.println(e);
         }
@@ -1032,7 +1033,6 @@ public class Board {
             for (int col = 0; col < 8; col++) {
                 if (boardstate[row][col].getType().equals(pawnThreat)) {
                     if(pawnLogic(row, col, boardstate).contains(kingPos)) {
-                        System.out.println("PAWN CHECK");
                         checks++;
                     }
                 }
@@ -1056,7 +1056,6 @@ public class Board {
             for (int col = 0; col < 8; col++) {
                 if (boardstate[row][col].getType().equals(knightThreat)) {
                     if(knightLogic(row, col, boardstate).contains(kingPos)) {
-                        System.out.println("KNIGHT CHECK");
                         checks++;
                     }
                 }
@@ -1096,7 +1095,6 @@ public class Board {
 
         int[] attackerCoords = coordOfPosition(attackerPos);
         Piece attacker = boardstate[attackerCoords[0]][attackerCoords[1]];
-        System.out.println(attackerPos);
         // Knights and pawns cannot be blocked.
         if (attacker.getType().equalsIgnoreCase("N") || attacker.getType().equalsIgnoreCase("P")) {
             for (int row = 0; row < 8; row++) {

@@ -261,6 +261,8 @@ public class ChessBoardGUI {
                     currentGamestate = gamestate.WHITE_SELECT;
                 } else if (currentGamestate == gamestate.BLACK && chessBoardSquares[row][column].getColor() == 1) {
                     currentGamestate = gamestate.BLACK_SELECT;
+                } else {
+                    break;
                 }
                 currentLegalMoves = board.legalMoves(row, column, chessBoardSquares);
                 // Color current piece and legalMoves
