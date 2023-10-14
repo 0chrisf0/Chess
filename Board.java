@@ -491,6 +491,15 @@ public class Board {
         HashSet<Integer[]> spots = spotGenerator(originRow, originColumn);
         Piece currentPiece = boardstate[originRow][originColumn];
         int kingColor = currentPiece.getColor();
+        String rookType;
+        HashSet<String> castleTypes = new HashSet<>();
+        for(String letter : canCastle) {
+            System.out.println("canCastle field: " + letter + ",");
+        }
+        // Add castling moves, if any
+        checkCastling(originRow, originColumn, boardstate, legalMoves);
+
+
         for (Integer[] spot : spots) {
             Piece piece;
             try {
@@ -499,7 +508,7 @@ public class Board {
                 continue;
             }
             if (piece.getColor() == kingColor) {
-                // TODO this is where I will check for castling
+                continue;
             } else {
                 // Check if this spot neighbors the opposing king
                 boolean neighborKing = false;
@@ -516,22 +525,6 @@ public class Board {
                         neighborKing = true;
                     }
                 }
-               // Simulate the position if the king made the given move, then reset to original
-//                String originalSpotType = piece.getType();
-//                int originalSpotColor = piece.getColor();
-//                String originalKingType = currentPiece.getType();
-//                piece.setType(currentPiece.getType());
-//                piece.setColor(currentPiece.getColor());
-//                currentPiece.setType("Empty");
-//                currentPiece.setColor(0);
-//                System.out.println("SPOT: " + spot[0] + spot[1]);
-//                if(detectChecks(kingColor, boardstate) == 0 && !neighborKing) {
-//                    legalMoves.add(positionOfCoord(spot[0],spot[1]));
-//                }
-//                piece.setType(originalSpotType);
-//                piece.setColor(originalSpotColor);
-//                currentPiece.setType(originalKingType);
-//                currentPiece.setColor(kingColor);
                 if (!simulateCheckTest(currentPiece, kingColor, positionOfCoord(spot[0],spot[1]),boardstate) && !neighborKing) {
                     legalMoves.add(positionOfCoord(spot[0],spot[1]));
                 }
@@ -539,6 +532,48 @@ public class Board {
         }
 
         return legalMoves;
+    }
+
+    /**
+     * Adds any valid castling moves to the king's set of legal moves.
+     */
+    private void checkCastling(int originRow, int originCol, Piece[][] boardstate, HashSet<String> legalMoves) {
+        // TODO: scan to see if there are any pieces impeding the king from reaching the rook
+        Piece king = boardstate[originRow][originCol];
+        int kingColor = king.getColor();
+        // White King
+        Piece currentPiece;
+        if (kingColor == -1) {
+            if (canCastle.contains("K")) {
+                int right = scanAdjust(originRow,originCol,dir.RIGHT, boardstate);
+                currentPiece = boardstate[originRow][right];
+                if (currentPiece.getType().equals("R")) {
+                    legalMoves.add(positionOfCoord(originRow,right));
+                }
+            }
+            if (canCastle.contains("Q")) {
+                int left = scanAdjust(originRow,originCol,dir.LEFT, boardstate);
+                currentPiece = boardstate[originRow][left];
+                if (currentPiece.getType().equals("R")) {
+                    legalMoves.add(positionOfCoord(originRow,left));
+                }
+            }
+        } else { //Black King
+            if (canCastle.contains("k")) {
+                int right = scanAdjust(originRow,originCol,dir.RIGHT, boardstate);
+                currentPiece = boardstate[originRow][right];
+                if (currentPiece.getType().equals("r")) {
+                    legalMoves.add(positionOfCoord(originRow,right));
+                }
+            }
+            if (canCastle.contains("q")) {
+                int left = scanAdjust(originRow,originCol,dir.LEFT, boardstate);
+                currentPiece = boardstate[originRow][left];
+                if (currentPiece.getType().equals("r")) {
+                    legalMoves.add(positionOfCoord(originRow,left));
+                }
+            }
+        }
     }
 
     /**

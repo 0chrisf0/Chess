@@ -395,11 +395,28 @@ public class ChessBoardGUI {
         }
         if(origin.getType().equalsIgnoreCase("K")) {
             // Special things to consider for kings:
-            // E.g. Castling
-            target.reinitialize(origin); // Is this all I need to do?
+            // Castling
+            if (destCol - lastclick[1] > 1) {
+                // Kingside castle
+                Piece kingTarget = chessBoardSquares[destRow][destCol-1];
+                Piece rookTarget = chessBoardSquares[lastclick[0]][lastclick[1]+1];
+                rookTarget.reinitialize(target);
+                kingTarget.reinitialize(origin);
+                target.reinitialize(empty);
+                origin.reinitialize(empty);
+                return;
+            } else if (destCol - lastclick[1] < -1) {
+                // Queenside castle
+                Piece kingTarget = chessBoardSquares[destRow][destCol+2];
+                Piece rookTarget = chessBoardSquares[lastclick[0]][lastclick[1]-1];
+                rookTarget.reinitialize(target);
+                kingTarget.reinitialize(origin);
+                target.reinitialize(empty);
+                origin.reinitialize(empty);
+            }
+            target.reinitialize(origin);
             target.setMoved(true);
             origin.reinitialize(empty);
-            return;
         }
         target.reinitialize(origin); // Is this all I need to do?
         target.setMoved(true);
