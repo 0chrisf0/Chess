@@ -105,6 +105,8 @@ public class Board {
         Piece currentPiece = boardstate[originRow][originColumn];
         String piece = currentPiece.getType();
         int color = currentPiece.getColor();
+        boolean inCheck = detectChecks(color, boardstate) > 0;
+
         if (piece.equalsIgnoreCase("P")) {
             legalMoves = pawnLogic(originRow, originColumn, boardstate);
         }
@@ -124,7 +126,7 @@ public class Board {
             legalMoves = knightLogic(originRow, originColumn, boardstate);
         }
 
-       if (detectChecks(color, boardstate) > 0) {
+       if (inCheck) {
            removeIllegalMoves(currentPiece, color, legalMoves, boardstate);
        }
         return legalMoves;
@@ -502,9 +504,10 @@ public class Board {
                 // Check if this spot neighbors the opposing king
                 boolean neighborKing = false;
                 HashSet<Integer[]> neighborSpots = spotGenerator(spot[0],spot[1]);
+                Piece neighbor;
                 for (Integer[] neighborSpot : neighborSpots) {
                     try {
-                        piece = boardstate[neighborSpot[0]][neighborSpot[1]];
+                         neighbor = boardstate[neighborSpot[0]][neighborSpot[1]];
                     } catch (IndexOutOfBoundsException e) {
                         continue;
                     }
@@ -513,22 +516,25 @@ public class Board {
                         neighborKing = true;
                     }
                 }
-
-                // Simulate the position if the king made the given move, then reset to original
-                String originalSpotType = piece.getType();
-                int originalSpotColor = piece.getColor();
-                String originalKingType = currentPiece.getType();
-                piece.setType(currentPiece.getType());
-                piece.setColor(currentPiece.getColor());
-                currentPiece.setType("Empty");
-                currentPiece.setColor(0);
-                if(detectChecks(kingColor, boardstate) == 0 && !neighborKing) {
+               // Simulate the position if the king made the given move, then reset to original
+//                String originalSpotType = piece.getType();
+//                int originalSpotColor = piece.getColor();
+//                String originalKingType = currentPiece.getType();
+//                piece.setType(currentPiece.getType());
+//                piece.setColor(currentPiece.getColor());
+//                currentPiece.setType("Empty");
+//                currentPiece.setColor(0);
+//                System.out.println("SPOT: " + spot[0] + spot[1]);
+//                if(detectChecks(kingColor, boardstate) == 0 && !neighborKing) {
+//                    legalMoves.add(positionOfCoord(spot[0],spot[1]));
+//                }
+//                piece.setType(originalSpotType);
+//                piece.setColor(originalSpotColor);
+//                currentPiece.setType(originalKingType);
+//                currentPiece.setColor(kingColor);
+                if (!simulateCheckTest(currentPiece, kingColor, positionOfCoord(spot[0],spot[1]),boardstate) && !neighborKing) {
                     legalMoves.add(positionOfCoord(spot[0],spot[1]));
                 }
-                piece.setType(originalSpotType);
-                piece.setColor(originalSpotColor);
-                currentPiece.setType(originalKingType);
-                currentPiece.setColor(kingColor);
             }
         }
 

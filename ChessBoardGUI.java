@@ -202,6 +202,10 @@ public class ChessBoardGUI {
         if (userInput == null) {
             return;
         }
+        if (currentGamestate != gamestate.INACTIVE) {
+            currentGamestate = gamestate.INACTIVE;
+            uncolor();
+        }
         // Initialize the board with the given FEN
         String[] fields = userInput.split(" ");
         board = new Board(fields);
