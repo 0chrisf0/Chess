@@ -57,6 +57,13 @@ public class Board {
     private dir attackerDir;
 
     /**
+     * Removes a given castling direction from canCastle.
+     */
+    public void removeCastle(String type) {
+        canCastle.remove(type);
+    }
+
+    /**
      * Returns whose turn it is
      */
     public String getTurn() {
@@ -538,9 +545,11 @@ public class Board {
      * Adds any valid castling moves to the king's set of legal moves.
      */
     private void checkCastling(int originRow, int originCol, Piece[][] boardstate, HashSet<String> legalMoves) {
-        // TODO: scan to see if there are any pieces impeding the king from reaching the rook
         Piece king = boardstate[originRow][originCol];
         int kingColor = king.getColor();
+        if (king.getHasMoved() || detectChecks(kingColor,boardstate) > 0) {
+            return;
+        }
         // White King
         Piece currentPiece;
         if (kingColor == -1) {
@@ -548,14 +557,26 @@ public class Board {
                 int right = scanAdjust(originRow,originCol,dir.RIGHT, boardstate);
                 currentPiece = boardstate[originRow][right];
                 if (currentPiece.getType().equals("R")) {
-                    legalMoves.add(positionOfCoord(originRow,right));
+                    if (!currentPiece.getHasMoved()) {
+                        if (safePath(originRow, originCol, originCol+2, boardstate)) {
+                            legalMoves.add(positionOfCoord(originRow, right));
+                        }
+                    } else {
+                        removeCastle("K");
+                    }
                 }
             }
             if (canCastle.contains("Q")) {
                 int left = scanAdjust(originRow,originCol,dir.LEFT, boardstate);
                 currentPiece = boardstate[originRow][left];
                 if (currentPiece.getType().equals("R")) {
-                    legalMoves.add(positionOfCoord(originRow,left));
+                    if (!currentPiece.getHasMoved()) {
+                        if (safePath(originRow, originCol, originCol-2, boardstate)) {
+                            legalMoves.add(positionOfCoord(originRow, left));
+                        }
+                    } else {
+                        removeCastle("Q");
+                    }
                 }
             }
         } else { //Black King
@@ -563,19 +584,52 @@ public class Board {
                 int right = scanAdjust(originRow,originCol,dir.RIGHT, boardstate);
                 currentPiece = boardstate[originRow][right];
                 if (currentPiece.getType().equals("r")) {
-                    legalMoves.add(positionOfCoord(originRow,right));
+                    if (!currentPiece.getHasMoved()) {
+                        if (safePath(originRow, originCol, originCol+2, boardstate)) {
+                            legalMoves.add(positionOfCoord(originRow, right));
+                        }
+                    } else {
+                        removeCastle("k");
+                    }
                 }
             }
             if (canCastle.contains("q")) {
                 int left = scanAdjust(originRow,originCol,dir.LEFT, boardstate);
                 currentPiece = boardstate[originRow][left];
                 if (currentPiece.getType().equals("r")) {
-                    legalMoves.add(positionOfCoord(originRow,left));
+                    if (!currentPiece.getHasMoved()) {
+                        if (safePath(originRow, originCol, originCol-2, boardstate)) {
+                            legalMoves.add(positionOfCoord(originRow, left));
+                        }
+                    } else {
+                        removeCastle("q");
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Returns whether the horizontal path from originCol to destCol is free from checks on the king
+     * at originRow,originCol.
+     */
+    private boolean safePath(int originRow, int originCol, int destCol, Piece[][]boardstate) {
+        System.out.println("ORIGINCOL: " + originCol + " DESTCOL: " + destCol);
+        Piece king = boardstate[originRow][originCol];
+        int kingColor = king.getColor();
+        if (originCol > destCol) {
+            int temp = originCol;
+            originCol = destCol;
+            destCol = temp;
+        }
+
+        for(int i = originCol+1; i < destCol+1; i++) {
+            if (simulateCheckTest(king, kingColor, positionOfCoord(originRow,i), boardstate)) {
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Returns the column or row number of the first square that the piece CANNOT move to. A piece
      * can not move past a piece that is blocking its path.
@@ -1202,6 +1256,10 @@ public class Board {
 
     }
 
+    /**
+     * Whether or not
+     * The attacker on the given king can be blocked or captured.
+     */
     public boolean canCaptureOrBlock(int color, Piece[][] boardstate, int[] kingCoords, String kingPos) {
 
         int[] attackerCoords = coordOfPosition(attackerPos);

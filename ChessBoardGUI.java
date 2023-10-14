@@ -401,23 +401,51 @@ public class ChessBoardGUI {
                 Piece kingTarget = chessBoardSquares[destRow][destCol-1];
                 Piece rookTarget = chessBoardSquares[lastclick[0]][lastclick[1]+1];
                 rookTarget.reinitialize(target);
+                rookTarget.setMoved(true);
                 kingTarget.reinitialize(origin);
+                kingTarget.setMoved(true);
                 target.reinitialize(empty);
                 origin.reinitialize(empty);
+                if(rookTarget.getColor() == -1) {
+                    board.removeCastle("K");
+                } else {
+                    board.removeCastle("k");
+                }
                 return;
             } else if (destCol - lastclick[1] < -1) {
                 // Queenside castle
                 Piece kingTarget = chessBoardSquares[destRow][destCol+2];
                 Piece rookTarget = chessBoardSquares[lastclick[0]][lastclick[1]-1];
                 rookTarget.reinitialize(target);
+                rookTarget.setMoved(true);
                 kingTarget.reinitialize(origin);
+                kingTarget.setMoved(true);
                 target.reinitialize(empty);
                 origin.reinitialize(empty);
+                // You can't castle twice
+                if(rookTarget.getColor() == -1) {
+                    board.removeCastle("Q");
+                    board.removeCastle("K");
+                } else {
+                    board.removeCastle("q");
+                    board.removeCastle("k");
+                }
+                return;
+            }
+            // Once the king moves he cannot castle
+            if(origin.getColor() == -1) {
+                board.removeCastle("Q");
+                board.removeCastle("K");
+            } else {
+                board.removeCastle("q");
+                board.removeCastle("k");
             }
             target.reinitialize(origin);
             target.setMoved(true);
             origin.reinitialize(empty);
+            return;
         }
+        // All other pieces
         target.reinitialize(origin); // Is this all I need to do?
         target.setMoved(true);
         origin.reinitialize(empty);
