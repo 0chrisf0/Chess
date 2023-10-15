@@ -88,6 +88,7 @@ public class Board {
             }
         }
         // Fourth field: en passantables
+        // TODO convert to my position system before adding
         if (fields[3].charAt(0) != '-') { //TODO does this work?
             for (int i = 0; i < fields[3].length(); i = i + 2) {
                 passant.add(fields[3].substring(i, i + 2));
@@ -617,15 +618,19 @@ public class Board {
         System.out.println("ORIGINCOL: " + originCol + " DESTCOL: " + destCol);
         Piece king = boardstate[originRow][originCol];
         int kingColor = king.getColor();
-        if (originCol > destCol) {
-            int temp = originCol;
-            originCol = destCol;
-            destCol = temp;
+        if (originCol < destCol) {
+            for (int i = originCol + 1; i < destCol + 1; i++) {
+                if (simulateCheckTest(king, kingColor, positionOfCoord(originRow, i), boardstate)) {
+                    return false;
+                }
+            }
         }
-
-        for(int i = originCol+1; i < destCol+1; i++) {
-            if (simulateCheckTest(king, kingColor, positionOfCoord(originRow,i), boardstate)) {
-                return false;
+        else if (originCol > destCol) {
+            for (int i = originCol - 1; i > destCol - 1; i--) {
+                System.out.println("here");
+                if (simulateCheckTest(king, kingColor, positionOfCoord(originRow, i), boardstate)) {
+                    return false;
+                }
             }
         }
         return true;
