@@ -222,7 +222,15 @@ public class ChessBoardGUI {
                         column++;
                     }
                 } catch (NumberFormatException e) {
-                    Piece piece = new Piece(ranks[row].substring(j,j+1), false);
+                    // Enforce hasMoved for pawns
+                    Piece piece;
+                    if (ranks[row].substring(j,j+1).equals("p") && row == 1) {
+                        piece = new Piece(ranks[row].substring(j,j+1), false);
+                    } else if (ranks[row].substring(j,j+1).equals("P") && row == 6) {
+                        piece = new Piece(ranks[row].substring(j,j+1), false);
+                    } else {
+                        piece = new Piece(ranks[row].substring(j,j+1), true);
+                    }
                     chessBoardSquares[row][column].reinitialize(piece);
                     column++;
                 }
@@ -304,6 +312,7 @@ public class ChessBoardGUI {
                     if (currentGamestate == gamestate.CHECKMATE) {
                         // END GAME
                     }
+                    // Switch turn
                     else if (currentGamestate == gamestate.WHITE_SELECT) {
                         currentGamestate = gamestate.BLACK;
                     } else {
@@ -333,6 +342,8 @@ public class ChessBoardGUI {
      * fields. related to the backing data and the display on the GUI.
      */
     private void makeMove(int destRow, int destCol) {
+        // Empty current passant moves
+        board.emptyPassant();
         Piece empty = new Piece("Empty",false);
         Piece origin = chessBoardSquares[lastclick[0]][lastclick[1]];
         Piece target = chessBoardSquares[destRow][destCol];
@@ -387,9 +398,29 @@ public class ChessBoardGUI {
                 }
 
             }
+            // En Passant:
+            // 1. Update things when pawns move 2 spaces.
+            // 2. Capture the piece that should be captured
+            if (Math.abs(destRow - lastclick[0]) > 1) {
+                if(currentGamestate == gamestate.BLACK_SELECT) {
+                    board.addPassant(board.positionOfCoord(destRow-1, destCol));
+                } else {
+                    board.addPassant(board.positionOfCoord(destRow+1, destCol));
+                }
+            }
+            if (destCol != lastclick[1] && target.getType().equals("Empty")) {
+                Piece passantTarget;
+                if(currentGamestate == gamestate.BLACK_SELECT) {
+                    passantTarget = chessBoardSquares[destRow+1][destCol];
+                } else {
+                    passantTarget = chessBoardSquares[destRow-1][destCol];
+                }
+                passantTarget.reinitialize(empty);
+            }
             target.reinitialize(origin); // Is this all I need to do?
             target.setMoved(true);
-            // This maintains the background because I am just setting the background to what it already is
+            // This maintains the background because I am just setting the background
+            // to what it already is
             origin.reinitialize(empty);
             return;
         }

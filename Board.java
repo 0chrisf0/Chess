@@ -50,10 +50,28 @@ public class Board {
     }
 
     /**
+     * Adds a valid position to passant to for the next turn.
+     */
+    public void addPassant(String position) {
+        passant.add(position);
+    }
+
+    /**
+     * Empties the current set of passant moves.
+     */
+    public void emptyPassant() {
+        passant = new HashSet<>();
+    }
+
+
+    /**
      * The location of the last piece detected to be currently attacking a king.
      */
     private String attackerPos = "";
 
+    /**
+     * Direction in relation to the king that the attack is coming from.
+     */
     private dir attackerDir;
 
     /**
@@ -88,10 +106,12 @@ public class Board {
             }
         }
         // Fourth field: en passantables
-        // TODO convert to my position system before adding
-        if (fields[3].charAt(0) != '-') { //TODO does this work?
+        if (fields[3].charAt(0) != '-') {
             for (int i = 0; i < fields[3].length(); i = i + 2) {
-                passant.add(fields[3].substring(i, i + 2));
+                String currentPos = fields[3].substring(i, i + 2);
+                int col = currentPos.charAt(0) - 97;
+                int row = 8 - (currentPos.charAt(1) - 48);
+                passant.add(row + Integer.toString(col));
             }
         }
         // Fifth field: halfmoves
@@ -615,7 +635,6 @@ public class Board {
      * at originRow,originCol.
      */
     private boolean safePath(int originRow, int originCol, int destCol, Piece[][]boardstate) {
-        System.out.println("ORIGINCOL: " + originCol + " DESTCOL: " + destCol);
         Piece king = boardstate[originRow][originCol];
         int kingColor = king.getColor();
         if (originCol < destCol) {
@@ -627,7 +646,6 @@ public class Board {
         }
         else if (originCol > destCol) {
             for (int i = originCol - 1; i > destCol - 1; i--) {
-                System.out.println("here");
                 if (simulateCheckTest(king, kingColor, positionOfCoord(originRow, i), boardstate)) {
                     return false;
                 }
