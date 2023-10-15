@@ -1290,8 +1290,9 @@ public class Board {
                             continue;
                         }
                         // Want to find allied piece that can block/capture
+                        // positionOfCoord represents the curent point along the path
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(i,currentCol))) {
                             return false;
                         }
                     }
@@ -1309,7 +1310,7 @@ public class Board {
                             continue;
                         }
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(i,currentCol))) {
                             return false;
                         }
                     }
@@ -1327,7 +1328,7 @@ public class Board {
                             continue;
                         }
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(i,currentCol))) {
                             return false;
                         }
                     }
@@ -1345,7 +1346,7 @@ public class Board {
                             continue;
                         }
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(i,currentCol))) {
                             return false;
                         }
                     }
@@ -1363,7 +1364,7 @@ public class Board {
                             continue;
                         }
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(i,originColumn))) {
                             return false;
                         }
                     }
@@ -1378,7 +1379,7 @@ public class Board {
                             continue;
                         }
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(i,originColumn))) {
                             return false;
                         }
                     }
@@ -1394,7 +1395,7 @@ public class Board {
                             continue;
                         }
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(originRow, i))) {
                             return false;
                         }
                     }
@@ -1409,7 +1410,7 @@ public class Board {
                             continue;
                         }
                         if (boardstate[row][col].getColor() == color &&
-                                legalMoves(row, col, boardstate).contains(attackerPos)) {
+                                legalMoves(row, col, boardstate).contains(positionOfCoord(originRow, i))) {
                             return false;
                         }
                     }
