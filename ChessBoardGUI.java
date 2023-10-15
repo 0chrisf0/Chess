@@ -54,7 +54,9 @@ public class ChessBoardGUI {
         WHITE_SELECT,
         BLACK,
         BLACK_SELECT,
-        CHECKMATE
+        CHECKMATE,
+        DRAW,
+        STALEMATE
     }
 
 
@@ -311,6 +313,8 @@ public class ChessBoardGUI {
                     boardUpdate();
                     if (currentGamestate == gamestate.CHECKMATE) {
                         // END GAME
+                    } else if (currentGamestate == gamestate.STALEMATE) {
+                        // END GAME
                     }
                     // Switch turn
                     else if (currentGamestate == gamestate.WHITE_SELECT) {
@@ -505,21 +509,29 @@ public class ChessBoardGUI {
                 chessBoardSquares[i][j].resetPin();
             }
         }
-        // Detect check
+        // Detect check, checkmate, and draws
         if (currentGamestate == gamestate.WHITE_SELECT) {
             if (board.detectChecks(1, chessBoardSquares) > 0) {
                 if (board.detectCheckmate(1, chessBoardSquares)) {
                     currentGamestate = gamestate.CHECKMATE;
                 }
+            } else {
+                // Detect stalemate
+                if (board.detectStalemate(1, chessBoardSquares)) {
+                    currentGamestate = gamestate.STALEMATE;
+                }
             }
         } else {
             if (board.detectChecks(-1, chessBoardSquares) > 0) {
-
                 if (board.detectCheckmate(-1, chessBoardSquares)) {
                     currentGamestate = gamestate.CHECKMATE;
                 }
+            } else {
+                // Detect stalemate
+                if (board.detectStalemate(-1, chessBoardSquares)) {
+                    currentGamestate = gamestate.STALEMATE;
+                }
             }
-
         }
 
     }

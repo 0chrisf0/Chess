@@ -1442,6 +1442,32 @@ public class Board {
         }
         return true;
     }
+
+    /**
+     * Detects stalemate based on the state of the given king.
+     */
+    public boolean detectStalemate(int color, Piece[][] boardstate) {
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Piece currentPiece = boardstate[row][col];
+                if (currentPiece.getColor() == color) {
+                    HashSet<String> currentMoves = legalMoves(row, col, boardstate);
+                    // Need to take into account legalMove to itself
+                    boolean onlySelf = true;
+                    for (String position : currentMoves) {
+                        if(!position.equals(positionOfCoord(row,col))) {
+                            onlySelf = false;
+                        }
+                    }
+                    if (!onlySelf) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     /**
      * Converts a row and column to a String position.
      */
