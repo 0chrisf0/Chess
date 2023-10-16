@@ -1,6 +1,3 @@
-import java.awt.Color;
-import java.beans.IndexedPropertyDescriptor;
-import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -125,10 +122,6 @@ public class Board {
      * This will make additional features in the future easier.
      */
     public HashSet<String> legalMoves(int originRow, int originColumn, Piece[][] boardstate) {
-        // TODO delete this after implementing en passant
-        for(String e : passant) {
-            System.out.println(e);
-        }
         HashSet<String> legalMoves = new HashSet<>();
         Piece currentPiece = boardstate[originRow][originColumn];
         String piece = currentPiece.getType();
@@ -297,7 +290,6 @@ public class Board {
                 }
             }
         }
-        // TODO: (delete?) System.out.println("Left: " + captureLeft + " Right: " + captureRight + " Pushing: " +  pushing);
         return legalMoves;
     }
 
@@ -486,9 +478,6 @@ public class Board {
      */
     private HashSet<String> queenLogic(int originRow, int originColumn, Piece[][] boardstate) {
         Piece currentPiece = boardstate[originRow][originColumn];
-        for(dir direction : currentPiece.getPinned()) {
-            System.out.println(direction);
-        }
         HashSet<String> rookLegalMoves = rookLogic(originRow, originColumn, boardstate);
         HashSet<String> bishopLegalMoves = bishopLogic(originRow,originColumn,boardstate);
         rookLegalMoves.addAll(bishopLegalMoves);
@@ -519,11 +508,7 @@ public class Board {
         HashSet<Integer[]> spots = spotGenerator(originRow, originColumn);
         Piece currentPiece = boardstate[originRow][originColumn];
         int kingColor = currentPiece.getColor();
-        String rookType;
         HashSet<String> castleTypes = new HashSet<>();
-        for(String letter : canCastle) {
-            System.out.println("canCastle field: " + letter + ",");
-        }
         // Add castling moves, if any
         checkCastling(originRow, originColumn, boardstate, legalMoves);
 
@@ -849,7 +834,7 @@ public class Board {
      * Finds where the kings are on the board.
      */
     private String findKings(int color, Piece[][] boardstate) {
-        for (int row = 0; row < 8; row++) { //TODO more efficient way of finding the king?
+        for (int row = 0; row < 8; row++) {
             for (int column = 0; column < 8; column++) {
                 if (boardstate[row][column].getType().equals("K") && color == -1) {
                     return positionOfCoord(row, column);
@@ -897,7 +882,6 @@ public class Board {
      * Returns the number of checks on the king of the specified color
      */
     public int detectChecks (int color, Piece[][] boardstate) {
-        // TODO make a helper for this function, the 8 directions are very repetitive
         HashSet<String> perpThreats = new HashSet<>();
         HashSet<String> diagThreats = new HashSet<>();
         if (color == -1) {
@@ -1269,19 +1253,13 @@ public class Board {
         // Conditions 2 & 3:
         // This detectChecks call is necessary to update incase kingLogic altered the fields
         if (detectChecks(color, boardstate) > 1) {
-            // TODO is this actually true? (if there is a double check we cannot block or capture)
             return legalMoves && true;
         }
-        if (legalMoves && canCaptureOrBlock(color, boardstate, kingCoords, king)) { //TODO delete
-            System.out.println("CHECKMATE");
-        }
         return legalMoves && canCaptureOrBlock(color, boardstate, kingCoords, king);
-
     }
 
     /**
-     * Whether or not
-     * The attacker on the given king can be blocked or captured.
+     * Whether the attacker on the given king can be blocked or captured.
      */
     public boolean canCaptureOrBlock(int color, Piece[][] boardstate, int[] kingCoords, String kingPos) {
 
@@ -1313,7 +1291,7 @@ public class Board {
                             continue;
                         }
                         // Want to find allied piece that can block/capture
-                        // positionOfCoord represents the curent point along the path
+                        // positionOfCoord represents the current point along the path
                         if (boardstate[row][col].getColor() == color &&
                                 legalMoves(row, col, boardstate).contains(positionOfCoord(i,currentCol))) {
                             return false;

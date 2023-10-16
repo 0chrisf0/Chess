@@ -1,8 +1,6 @@
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.HashSet;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
@@ -107,7 +105,6 @@ public class Piece extends JButton {
     }
 
     public Piece(String type, Boolean moved) {
-        // TODO what is super actually doing here?
         super();
         HashMap<String, String> filenames = new HashMap<>();
         filenames.put("k", "king");

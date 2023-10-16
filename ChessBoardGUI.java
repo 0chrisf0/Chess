@@ -1,7 +1,5 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -55,10 +53,8 @@ public class ChessBoardGUI {
         BLACK,
         BLACK_SELECT,
         CHECKMATE,
-        DRAW,
         STALEMATE
     }
-
 
     /**
      * Returns the current GUI.
@@ -100,8 +96,6 @@ public class ChessBoardGUI {
         JButton start = new JButton("Start");
         tools.add(start);
         start.addActionListener(e -> startGame());
-
-
 
         JButton newgame = new JButton("New");
         tools.add(newgame);
@@ -269,7 +263,6 @@ public class ChessBoardGUI {
      * Handles the movement of the pieces on the GUI. Ensures that moves are legal.
      */
     public void buttonPress(int row, int column) {
-        System.out.println("On Press: " + currentGamestate);
         switch (currentGamestate) {
             case WHITE,BLACK:
                 if (currentGamestate == gamestate.WHITE && chessBoardSquares[row][column].getColor() == -1) {
@@ -338,7 +331,6 @@ public class ChessBoardGUI {
         }
         lastclick[0] = row;
         lastclick[1] = column;
-        System.out.println("On Exit: " + currentGamestate);
     }
 
     /**

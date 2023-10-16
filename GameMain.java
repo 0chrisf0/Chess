@@ -18,7 +18,6 @@ public class GameMain {
         frame.pack();
         frame.setLocationRelativeTo(null);
 
-
         // Compute ideal window size and show window.
         frame.setVisible(true);
 
