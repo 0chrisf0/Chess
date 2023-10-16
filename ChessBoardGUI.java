@@ -101,10 +101,13 @@ public class ChessBoardGUI {
         tools.add(newgame);
         newgame.addActionListener(e -> setupBoard());
 
-        tools.add(new JButton("Save")); // TODO - add functionality!
-        tools.add(new JButton("Restore")); // TODO - add functionality!
+        tools.add(new JButton("Save")); // TODO - add functionality
+        tools.add(new JButton("Restore")); // TODO - add functionality
         tools.addSeparator();
-        tools.add(new JButton("Resign")); // TODO - add functionality!
+
+        JButton resign = new JButton("Resign");
+        tools.add(resign); // TODO - add functionality
+        resign.addActionListener(e -> currentGamestate = gamestate.CHECKMATE);
         tools.addSeparator();
         tools.add(message);
 
@@ -345,7 +348,8 @@ public class ChessBoardGUI {
         Piece target = chessBoardSquares[destRow][destCol];
 
         if(target.getColor() != 0) {
-            // TODO: Do something regarding captures? E.g. listing the captured pieces on the gui somewhere?
+            // TODO: Do something regarding captures?
+            //  E.g. listing the captured pieces on the gui somewhere?
         }
         if(origin.getType().equalsIgnoreCase("P")) {
             // Special things need to be done for pawns:
