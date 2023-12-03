@@ -1,6 +1,6 @@
 Chris Fernandes Chess Project (cpf44@cornell.edu)
 
-![Sample Image](icons/chessimg.jpeg)
+![Example Image](icons/chessimg.jpeg)
 
 
 General Information:
