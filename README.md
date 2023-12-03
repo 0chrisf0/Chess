@@ -1,5 +1,8 @@
 Chris Fernandes Chess Project (cpf44@cornell.edu)
 
+![Sample Image](icons/chessimg.jpeg)
+
+
 General Information:
 -Goal: Implement a chess game with a GUI where players can play each other locally,
 only making moves as enforced by the rules of chess. I focussed more on solid object-oriented design
