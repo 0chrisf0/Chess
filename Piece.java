@@ -1,4 +1,6 @@
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.ImageIcon;
@@ -20,9 +22,9 @@ public class Piece extends JButton {
     private String type;
 
     /**
-     * Correct icon file name.
+     * Correct icon image.
      */
-    private String iconFile;
+    private java.awt.Image iconImage;
 
     /**
      * Whether this piece has moved
@@ -119,20 +121,30 @@ public class Piece extends JButton {
             this.color = 0;
         } else if (type.equals(type.toUpperCase())) { // White Piece
             this.color = -1;
-            iconFile = "icons/white" + filenames.get(type.toLowerCase()) + ".png";
+            iconImage = (Toolkit.getDefaultToolkit().getImage(getClass().getResource
+                    ("icons/white" + filenames.get(type.toLowerCase()) + ".png")));
+//            iconFile = "icons/white" + filenames.get(type.toLowerCase()) + ".png";
         } else {
             this.color = 1; // Black Piece
-            iconFile = "icons/black" + filenames.get(type) + ".png";
+            iconImage = (Toolkit.getDefaultToolkit().getImage(getClass().getResource
+                    ("icons/black" + filenames.get(type) + ".png")));
+//            iconFile = "icons/black" + filenames.get(type) + ".png";
         }
     }
     public void reinitialize(Piece piece) {
         color = piece.color;
         type = piece.type;
-        iconFile = piece.iconFile;
+        iconImage = piece.iconImage;
         moved = piece.moved;
         background = getBackground();
         pinned = piece.pinned;
-        setIcon(new ImageIcon(piece.iconFile));
+        if (iconImage != null) {
+            setIcon(new ImageIcon(piece.iconImage));
+        } else {
+            ImageIcon icon = new ImageIcon(
+                    new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB));
+            setIcon(icon);
+        }
     }
 
 }

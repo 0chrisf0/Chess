@@ -411,9 +411,9 @@ public class ChessBoardGUI {
             if (destCol != lastclick[1] && target.getType().equals("Empty")) {
                 Piece passantTarget;
                 if(currentGamestate == gamestate.BLACK_SELECT) {
-                    passantTarget = chessBoardSquares[destRow+1][destCol];
-                } else {
                     passantTarget = chessBoardSquares[destRow-1][destCol];
+                } else {
+                    passantTarget = chessBoardSquares[destRow+1][destCol];
                 }
                 passantTarget.reinitialize(empty);
             }
