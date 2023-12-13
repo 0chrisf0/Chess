@@ -1,3 +1,5 @@
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -16,6 +18,12 @@ public class GameMain {
         frame.add(cb.getGui());
         frame.setResizable(false);
         frame.pack();
+        // Get the screen dimensions
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // Set the height to fill the screen
+        int screenHeight = screenSize.height;
+        frame.setSize(screenHeight, screenHeight);
         frame.setLocationRelativeTo(null);
     
         // Compute ideal window size and show window.
