@@ -1,5 +1,8 @@
 Chris Fernandes Chess Project (cpf44@cornell.edu)
 
+Deployed at: https://chess-408713.ue.r.appspot.com/
+Starting FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
 ![Example Image](icons/chessimg.jpeg)
 
 
