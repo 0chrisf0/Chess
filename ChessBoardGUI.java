@@ -223,12 +223,15 @@ public class ChessBoardGUI {
                 } catch (NumberFormatException e) {
                     // Enforce hasMoved for pawns
                     Piece piece;
-                    if (ranks[row].substring(j,j+1).equals("p") && row == 1) {
-                        piece = new Piece(ranks[row].substring(j,j+1), false);
-                    } else if (ranks[row].substring(j,j+1).equals("P") && row == 6) {
-                        piece = new Piece(ranks[row].substring(j,j+1), false);
+                    String pieceType = ranks[row].substring(j,j+1);
+                    if (pieceType.equals("p") && row == 1) {
+                        piece = new Piece(pieceType, false);
+                    } else if (pieceType.equals("P") && row == 6) {
+                        piece = new Piece(pieceType, false);
+                    } else if (pieceType.equals("P") || pieceType.equals("p")) {
+                        piece = new Piece(pieceType, true);
                     } else {
-                        piece = new Piece(ranks[row].substring(j,j+1), true);
+                        piece = new Piece(pieceType, false);
                     }
                     chessBoardSquares[row][column].reinitialize(piece);
                     column++;

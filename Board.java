@@ -122,6 +122,9 @@ public class Board {
      * This will make additional features in the future easier.
      */
     public HashSet<String> legalMoves(int originRow, int originColumn, Piece[][] boardstate) {
+        for(String letter : canCastle) {
+            System.out.println("CASTLE: " + letter);
+        }
         HashSet<String> legalMoves = new HashSet<>();
         Piece currentPiece = boardstate[originRow][originColumn];
         String piece = currentPiece.getType();
@@ -554,6 +557,7 @@ public class Board {
         Piece king = boardstate[originRow][originCol];
         int kingColor = king.getColor();
         if (king.getHasMoved() || detectChecks(kingColor,boardstate) > 0) {
+            System.out.println("KING HAS MOVED");
             return;
         }
         // White King
@@ -573,10 +577,13 @@ public class Board {
                 }
             }
             if (canCastle.contains("Q")) {
+                System.out.println("Q FOUND");
                 int left = scanAdjust(originRow,originCol,dir.LEFT, boardstate);
                 currentPiece = boardstate[originRow][left];
                 if (currentPiece.getType().equals("R")) {
+                    System.out.println("ROOK FOUND");
                     if (!currentPiece.getHasMoved()) {
+                        System.out.println("HASNT MOVED");
                         if (safePath(originRow, originCol, originCol-2, boardstate)) {
                             legalMoves.add(positionOfCoord(originRow, left));
                         }
