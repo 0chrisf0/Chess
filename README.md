@@ -12,8 +12,8 @@ only making moves as enforced by the rules of chess. I focussed more on solid ob
 rather than the efficiency and technical details of my implementations.
 
 Features:
-- All rules of piece movement are enforced, including but not limited to:
---> Pieces that are under absolute pins cannot move  
+- All rules of piece movement are enforced, including but not limited to:  
+--> Pieces that are under absolute pins cannot move    
 --> Castling only when allowed  
 --> En Passant only when allowed  
 --> User can input a valid FEN and generate that boardstate  
