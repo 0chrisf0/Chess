@@ -1,6 +1,6 @@
 Chris Fernandes Chess Project (cpf44@cornell.edu)
 
-Web Version: https://github.com/0chrisf0/Chess/blob/main/README.md
+Web Version: https://github.com/0chrisf0/Chess/blob/main/README.md     
 Starting FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 ![Example Image](icons/chessimg.jpeg)
